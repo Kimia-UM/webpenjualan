@@ -7,6 +7,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { 
   LayoutDashboard, 
   Database, 
@@ -38,7 +39,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="border-b border-neutral-900 bg-neutral-950/70 backdrop-blur-md sticky top-0 z-50">
+    <nav className="border-b border-neutral-200 dark:border-neutral-900 bg-white/75 dark:bg-neutral-950/70 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -47,7 +48,7 @@ export default function Navbar() {
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-md shadow-purple-900/20">
                 <Database className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-lg bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent">
+              <span className="font-bold text-lg bg-gradient-to-r from-neutral-900 via-neutral-700 to-neutral-500 dark:from-white dark:via-neutral-200 dark:to-neutral-400 bg-clip-text text-transparent transition-colors">
                 PremiumShare
               </span>
             </Link>
@@ -63,8 +64,8 @@ export default function Navbar() {
                     href={item.href}
                     className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       isActive
-                        ? 'bg-purple-950/30 text-purple-400 border border-purple-900/50'
-                        : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/40 border border-transparent'
+                        ? 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900/50'
+                        : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-900/40 border border-transparent'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -75,18 +76,19 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* User Profile & Logout (Desktop) */}
+          {/* User Profile, Theme Toggle & Logout (Desktop) */}
           <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
             {user && (
               <>
-                <span className="text-xs text-neutral-400">
-                  Login: <strong className="text-neutral-300 font-semibold">{user.email}</strong>
+                <span className="text-xs text-neutral-500 dark:text-neutral-400 transition-colors">
+                  Login: <strong className="text-neutral-800 dark:text-neutral-300 font-semibold">{user.email}</strong>
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleLogout}
-                  className="border-neutral-800 bg-neutral-900/40 hover:bg-neutral-800/80 text-neutral-300 hover:text-white gap-2 transition-all"
+                  className="border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white gap-2 transition-all"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Keluar</span>
@@ -95,14 +97,15 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Toggle & Theme Toggle */}
           <div className="md:hidden flex items-center gap-3">
+            <ThemeToggle />
             {user && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="text-neutral-400 hover:text-white"
+                className="text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
@@ -113,10 +116,10 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && user && (
-        <div className="md:hidden border-t border-neutral-900 bg-neutral-950 px-4 py-4 space-y-3">
-          <div className="pb-2 border-b border-neutral-900">
-            <span className="text-xs text-neutral-500 block">Masuk sebagai</span>
-            <span className="text-sm font-semibold text-neutral-300 block overflow-hidden text-ellipsis">
+        <div className="md:hidden border-t border-neutral-200 dark:border-neutral-900 bg-white dark:bg-neutral-950 px-4 py-4 space-y-3 shadow-lg transition-colors">
+          <div className="pb-2 border-b border-neutral-100 dark:border-neutral-900">
+            <span className="text-xs text-neutral-400 dark:text-neutral-500 block">Masuk sebagai</span>
+            <span className="text-sm font-semibold text-neutral-800 dark:text-neutral-300 block overflow-hidden text-ellipsis">
               {user.email}
             </span>
           </div>
@@ -131,8 +134,8 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-purple-950/40 text-purple-400 border border-purple-900/40'
-                      : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60 border border-transparent'
+                      ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900/40'
+                      : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-900/60 border border-transparent'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -141,7 +144,7 @@ export default function Navbar() {
               );
             })}
           </div>
-          <div className="pt-2 border-t border-neutral-900">
+          <div className="pt-2 border-t border-neutral-100 dark:border-neutral-900">
             <Button
               variant="outline"
               size="sm"
@@ -149,7 +152,7 @@ export default function Navbar() {
                 setMobileMenuOpen(false);
                 handleLogout();
               }}
-              className="w-full justify-center border-neutral-800 bg-neutral-900/40 hover:bg-neutral-800/80 text-neutral-300 hover:text-white gap-2"
+              className="w-full justify-center border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/40 hover:bg-neutral-100 dark:hover:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white gap-2"
             >
               <LogOut className="h-4 w-4" />
               <span>Keluar</span>

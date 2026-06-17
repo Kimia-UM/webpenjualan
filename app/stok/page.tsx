@@ -252,15 +252,15 @@ export default function StokPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-neutral-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-neutral-900 via-neutral-700 to-neutral-500 dark:from-white dark:via-neutral-200 dark:to-neutral-400 bg-clip-text text-transparent">
               Manajemen Stok (Host Accounts)
             </h1>
-            <p className="text-neutral-400 text-sm mt-1">
+            <p className="text-muted-foreground text-sm mt-1">
               Kelola akun induk premium beserta sisa slot dan masa aktif.
             </p>
           </div>
@@ -283,7 +283,7 @@ export default function StokPage() {
             placeholder="Cari email akun induk..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-neutral-900/40 border-neutral-800 text-neutral-200 focus:border-purple-500/50 focus:ring-purple-500/20"
+            className="pl-10 bg-white dark:bg-neutral-900/40 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200 focus:border-purple-500/50 focus:ring-purple-500/20"
           />
         </div>
 
@@ -292,43 +292,43 @@ export default function StokPage() {
           <div className="flex h-64 items-center justify-center">
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-              <p className="text-sm text-neutral-500">Memuat data akun...</p>
+              <p className="text-sm text-muted-foreground">Memuat data akun...</p>
             </div>
           </div>
         ) : filteredHosts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center border border-dashed border-neutral-800 rounded-2xl p-16 text-center bg-neutral-950/10">
-            <div className="h-12 w-12 rounded-2xl bg-neutral-900 flex items-center justify-center mb-4 text-neutral-600">
+          <div className="flex flex-col items-center justify-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl p-16 text-center bg-neutral-50/20 dark:bg-neutral-950/10">
+            <div className="h-12 w-12 rounded-2xl bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center mb-4 text-neutral-400 dark:text-neutral-600">
               <Database className="h-6 w-6" />
             </div>
-            <h3 className="font-semibold text-neutral-300 text-lg">Tidak Ada Data Akun</h3>
-            <p className="text-sm text-neutral-500 max-w-sm mt-1.5">
+            <h3 className="font-semibold text-neutral-800 dark:text-neutral-300 text-lg">Tidak Ada Data Akun</h3>
+            <p className="text-sm text-muted-foreground max-w-sm mt-1.5">
               {searchQuery ? 'Tidak ada hasil pencarian yang cocok.' : 'Belum ada akun induk yang terdaftar. Tambahkan akun baru sekarang.'}
             </p>
           </div>
         ) : (
           <>
             {/* Desktop Table View */}
-            <div className="hidden md:block border border-neutral-900 rounded-xl overflow-hidden bg-neutral-950/20">
+            <div className="hidden md:block border border-neutral-200 dark:border-neutral-900 rounded-xl overflow-hidden bg-white dark:bg-neutral-950/20 transition-colors">
               <Table>
-                <TableHeader className="bg-neutral-950/60">
-                  <TableRow className="border-b border-neutral-900 hover:bg-transparent">
-                    <TableHead className="text-neutral-400 font-semibold py-4">Email Akun Induk</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold">Tipe Billing</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold text-center">Total Slot</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold text-center">Sisa Slot</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold">Masa Aktif</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold">Status</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold text-right py-4 pr-6">Aksi</TableHead>
+                <TableHeader className="bg-neutral-50/80 dark:bg-neutral-950/60">
+                  <TableRow className="border-b border-neutral-200 dark:border-neutral-900 hover:bg-transparent">
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold py-4">Email Akun Induk</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Tipe Billing</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-center">Total Slot</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-center">Sisa Slot</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Masa Aktif</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Status</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-right py-4 pr-6">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredHosts.map((host) => {
                     const sisaSlotValue = host.id ? getSisaSlot(host.id, host.total_slot) : host.total_slot;
                     return (
-                      <TableRow key={host.id} className="border-b border-neutral-900 hover:bg-neutral-900/10 transition-colors">
-                        <TableCell className="font-medium text-neutral-200 py-4.5">{host.account_email}</TableCell>
-                        <TableCell className="capitalize text-neutral-300">{host.billing_type}</TableCell>
-                        <TableCell className="text-center text-neutral-300">{host.total_slot}</TableCell>
+                      <TableRow key={host.id} className="border-b border-neutral-200 dark:border-neutral-900 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/10 transition-colors">
+                        <TableCell className="font-medium text-neutral-800 dark:text-neutral-200 py-4.5">{host.account_email}</TableCell>
+                        <TableCell className="capitalize text-neutral-700 dark:text-neutral-300">{host.billing_type}</TableCell>
+                        <TableCell className="text-center text-neutral-700 dark:text-neutral-300">{host.total_slot}</TableCell>
                         <TableCell className="text-center">
                           <span className={`font-semibold px-2.5 py-1 rounded-full text-xs ${
                             sisaSlotValue <= 0 
@@ -340,9 +340,9 @@ export default function StokPage() {
                             {sisaSlotValue} Slot
                           </span>
                         </TableCell>
-                        <TableCell className="text-neutral-300">
+                        <TableCell className="text-neutral-700 dark:text-neutral-300">
                           <div className="flex items-center gap-2 text-xs">
-                            <Calendar className="h-3.5 w-3.5 text-neutral-500" />
+                            <Calendar className="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-500" />
                             <span>{formatIndonesianDate(host.active_until)}</span>
                           </div>
                         </TableCell>
@@ -352,7 +352,7 @@ export default function StokPage() {
                               ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20'
                               : host.status === 'proses'
                                 ? 'bg-amber-500/5 text-amber-400 border-amber-500/20'
-                                : 'bg-neutral-800 text-neutral-400 border-neutral-700/60'
+                                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 border-neutral-200 dark:border-neutral-700/60'
                           }`}>
                             {host.status === 'aktif' && <CheckCircle2 className="h-3 w-3" />}
                             {host.status === 'proses' && <Clock className="h-3 w-3" />}
@@ -366,7 +366,7 @@ export default function StokPage() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleEditOpen(host)}
-                              className="h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-900"
+                              className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900"
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -374,7 +374,7 @@ export default function StokPage() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeleteOpen(host)}
-                              className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-950/20"
+                              className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -392,12 +392,12 @@ export default function StokPage() {
               {filteredHosts.map((host) => {
                 const sisaSlotValue = host.id ? getSisaSlot(host.id, host.total_slot) : host.total_slot;
                 return (
-                  <div key={host.id} className="border border-neutral-900 rounded-xl bg-neutral-950/20 p-5 space-y-4">
+                  <div key={host.id} className="border border-neutral-200 dark:border-neutral-900 rounded-xl bg-white dark:bg-neutral-950/20 p-5 space-y-4 shadow-sm transition-colors">
                     <div className="flex items-start justify-between gap-3">
                       <div className="overflow-hidden">
-                        <h4 className="font-semibold text-neutral-200 truncate">{host.account_email}</h4>
+                        <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 truncate">{host.account_email}</h4>
                         <div className="flex gap-2 mt-1.5 flex-wrap">
-                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-neutral-900 text-neutral-400 border border-neutral-800">
+                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800">
                             {host.billing_type}
                           </span>
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border ${
@@ -405,7 +405,7 @@ export default function StokPage() {
                               ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20'
                               : host.status === 'proses'
                                 ? 'bg-amber-500/5 text-amber-400 border-amber-500/20'
-                                : 'bg-neutral-800 text-neutral-400 border-neutral-700/60'
+                                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 border-neutral-200 dark:border-neutral-700/60'
                           }`}>
                             <span className="capitalize">{host.status}</span>
                           </span>
@@ -416,7 +416,7 @@ export default function StokPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleEditOpen(host)}
-                          className="h-8 w-8 text-neutral-400 hover:text-white"
+                          className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -424,20 +424,20 @@ export default function StokPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDeleteOpen(host)}
-                          className="h-8 w-8 text-red-400 hover:text-red-300"
+                          className="h-8 w-8 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 py-3 border-y border-neutral-900/60 text-xs">
+                    <div className="grid grid-cols-2 gap-4 py-3 border-y border-neutral-200 dark:border-neutral-900/60 text-xs">
                       <div>
-                        <span className="text-neutral-500 block mb-1">Total Slot</span>
-                        <strong className="text-neutral-300">{host.total_slot} Slot</strong>
+                        <span className="text-neutral-500 dark:text-neutral-400 block mb-1">Total Slot</span>
+                        <strong className="text-neutral-700 dark:text-neutral-300">{host.total_slot} Slot</strong>
                       </div>
                       <div>
-                        <span className="text-neutral-500 block mb-1">Sisa Slot</span>
+                        <span className="text-neutral-500 dark:text-neutral-400 block mb-1">Sisa Slot</span>
                         <strong className={`font-semibold px-2 py-0.5 rounded-full ${
                           sisaSlotValue <= 0 
                             ? 'bg-red-500/10 text-red-400' 
@@ -450,8 +450,8 @@ export default function StokPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-neutral-400">
-                      <Calendar className="h-4 w-4 text-neutral-500" />
+                    <div className="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400">
+                      <Calendar className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
                       <span>Masa Aktif: {formatIndonesianDate(host.active_until)}</span>
                     </div>
                   </div>
@@ -464,12 +464,12 @@ export default function StokPage() {
 
       {/* Add / Edit Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="border-neutral-800 bg-[#0c0c0e] text-neutral-100 max-w-md rounded-2xl">
+        <DialogContent className="border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0c0c0e] text-neutral-800 dark:text-neutral-100 max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-neutral-100">
+            <DialogTitle className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
               {currentHost ? 'Edit Akun Induk' : 'Tambah Akun Induk'}
             </DialogTitle>
-            <DialogDescription className="text-neutral-400 text-xs">
+            <DialogDescription className="text-muted-foreground text-xs">
               Isi data detail akun induk premium di bawah ini.
             </DialogDescription>
           </DialogHeader>
@@ -483,7 +483,7 @@ export default function StokPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="form-email" className="text-xs font-semibold text-neutral-300">Email Akun Induk</Label>
+              <Label htmlFor="form-email" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Email Akun Induk</Label>
               <Input
                 id="form-email"
                 type="email"
@@ -491,21 +491,21 @@ export default function StokPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-neutral-950 border-neutral-800 focus:border-purple-500/50 text-neutral-100 placeholder:text-neutral-700"
+                className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 focus:border-purple-500/50 text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-700"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="form-billing" className="text-xs font-semibold text-neutral-300">Tipe Billing</Label>
+                <Label htmlFor="form-billing" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Tipe Billing</Label>
                 <Select 
                   value={billingType} 
                   onValueChange={(val) => { if (val) setBillingType(val as BillingType); }}
                 >
-                  <SelectTrigger id="form-billing" className="bg-neutral-950 border-neutral-800 text-neutral-200">
+                  <SelectTrigger id="form-billing" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                     <SelectValue placeholder="Pilih tipe" />
                   </SelectTrigger>
-                  <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200">
+                  <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                     <SelectItem value="harian">Harian</SelectItem>
                     <SelectItem value="mingguan">Mingguan</SelectItem>
                     <SelectItem value="bulanan">Bulanan</SelectItem>
@@ -514,7 +514,7 @@ export default function StokPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="form-slots" className="text-xs font-semibold text-neutral-300">Total Slot</Label>
+                <Label htmlFor="form-slots" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Total Slot</Label>
                 <Input
                   id="form-slots"
                   type="number"
@@ -523,34 +523,34 @@ export default function StokPage() {
                   value={totalSlot}
                   onChange={(e) => setTotalSlot(Number(e.target.value))}
                   required
-                  className="bg-neutral-950 border-neutral-800 focus:border-purple-500/50 text-neutral-100"
+                  className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 focus:border-purple-500/50 text-neutral-800 dark:text-neutral-100"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="form-active" className="text-xs font-semibold text-neutral-300">Masa Aktif</Label>
+                <Label htmlFor="form-active" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Masa Aktif</Label>
                 <Input
                   id="form-active"
                   type="date"
                   value={activeUntil}
                   onChange={(e) => setActiveUntil(e.target.value)}
                   required
-                  className="bg-neutral-950 border-neutral-800 focus:border-purple-500/50 text-neutral-100 block w-full custom-date-picker"
+                  className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 focus:border-purple-500/50 text-neutral-800 dark:text-neutral-100 block w-full custom-date-picker"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="form-status" className="text-xs font-semibold text-neutral-300">Status</Label>
+                <Label htmlFor="form-status" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Status</Label>
                 <Select 
                   value={status} 
                   onValueChange={(val) => { if (val) setStatus(val as HostStatus); }}
                 >
-                  <SelectTrigger id="form-status" className="bg-neutral-950 border-neutral-800 text-neutral-200">
+                  <SelectTrigger id="form-status" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                     <SelectValue placeholder="Pilih status" />
                   </SelectTrigger>
-                  <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200">
+                  <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                     <SelectItem value="proses">Proses</SelectItem>
                     <SelectItem value="aktif">Aktif</SelectItem>
                     <SelectItem value="nonaktif">Nonaktif</SelectItem>
@@ -564,7 +564,7 @@ export default function StokPage() {
                 type="button"
                 variant="ghost"
                 onClick={() => setIsFormOpen(false)}
-                className="text-neutral-400 hover:text-white hover:bg-neutral-900/60"
+                className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900/60"
               >
                 Batal
               </Button>
@@ -589,10 +589,10 @@ export default function StokPage() {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="border-neutral-800 bg-[#0c0c0e] text-neutral-100 max-w-sm rounded-2xl">
+        <DialogContent className="border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0c0c0e] text-neutral-800 dark:text-neutral-100 max-w-sm rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-neutral-100">Hapus Akun Induk?</DialogTitle>
-            <DialogDescription className="text-neutral-400 text-xs">
+            <DialogTitle className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Hapus Akun Induk?</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-xs">
               Tindakan ini tidak dapat dibatalkan. Akun <strong>{currentHost?.account_email}</strong> akan dihapus secara permanen dari database.
             </DialogDescription>
           </DialogHeader>
@@ -609,7 +609,7 @@ export default function StokPage() {
               type="button"
               variant="ghost"
               onClick={() => setIsDeleteOpen(false)}
-              className="text-neutral-400 hover:text-white hover:bg-neutral-900/60"
+              className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900/60"
             >
               Batal
             </Button>

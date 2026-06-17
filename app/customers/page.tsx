@@ -512,15 +512,15 @@ export default function CustomersPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-neutral-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 py-8 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-neutral-900 via-neutral-700 to-neutral-500 dark:from-white dark:via-neutral-200 dark:to-neutral-400 bg-clip-text text-transparent">
               Manajemen Customer (Subscriptions)
             </h1>
-            <p className="text-neutral-400 text-sm mt-1">
+            <p className="text-muted-foreground text-sm mt-1">
               Pantau durasi subscription customer aktif, habis, dan lakukan perpanjangan slot.
             </p>
           </div>
@@ -537,7 +537,7 @@ export default function CustomersPage() {
         {/* Filter & Search Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6 items-start sm:items-center justify-between">
           <div className="relative w-full sm:max-w-md">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-neutral-500">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-neutral-405 dark:text-neutral-500">
               <Search className="h-4 w-4" />
             </div>
             <Input
@@ -545,17 +545,17 @@ export default function CustomersPage() {
               placeholder="Cari email customer atau akun induk..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-neutral-900/40 border-neutral-800 text-neutral-200 focus:border-purple-500/50 focus:ring-purple-500/20"
+              className="pl-10 bg-white dark:bg-neutral-900/40 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200 focus:border-purple-500/50 focus:ring-purple-500/20"
             />
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-xs text-neutral-500 font-semibold shrink-0">Filter Status:</span>
+            <span className="text-xs text-neutral-500 dark:text-neutral-500 dark:text-neutral-400 font-semibold shrink-0">Filter Status:</span>
             <Select value={statusFilter} onValueChange={(val) => { if (val) setStatusFilter(val); }}>
-              <SelectTrigger className="w-full sm:w-[160px] bg-neutral-900/40 border-neutral-800 text-neutral-300">
+              <SelectTrigger className="w-full sm:w-[160px] bg-white dark:bg-neutral-900/40 border-neutral-200 dark:border-neutral-800 text-neutral-805 dark:text-neutral-700 dark:text-neutral-300">
                 <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
-              <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200">
+              <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
                 <SelectItem value="semua">Semua</SelectItem>
                 <SelectItem value="aktif">Aktif</SelectItem>
                 <SelectItem value="akan_habis">Akan Habis (≤3 hari)</SelectItem>
@@ -570,16 +570,16 @@ export default function CustomersPage() {
           <div className="flex h-64 items-center justify-center">
             <div className="flex flex-col items-center gap-3">
               <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-              <p className="text-sm text-neutral-500">Memuat data customer...</p>
+              <p className="text-sm text-muted-foreground">Memuat data customer...</p>
             </div>
           </div>
         ) : filteredSubs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center border border-dashed border-neutral-800 rounded-2xl p-16 text-center bg-neutral-950/10">
-            <div className="h-12 w-12 rounded-2xl bg-neutral-900 flex items-center justify-center mb-4 text-neutral-600">
+          <div className="flex flex-col items-center justify-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl p-16 text-center bg-neutral-50/20 dark:bg-neutral-955/10">
+            <div className="h-12 w-12 rounded-2xl bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center mb-4 text-neutral-400 dark:text-neutral-600">
               <Users className="h-6 w-6" />
             </div>
-            <h3 className="font-semibold text-neutral-300 text-lg">Tidak Ada Data Customer</h3>
-            <p className="text-sm text-neutral-500 max-w-sm mt-1.5">
+            <h3 className="font-semibold text-neutral-800 dark:text-neutral-300 text-lg">Tidak Ada Data Customer</h3>
+            <p className="text-sm text-muted-foreground max-w-sm mt-1.5">
               {searchQuery || statusFilter !== 'semua' 
                 ? 'Tidak ada hasil filter/pencarian yang cocok.' 
                 : 'Belum ada customer terdaftar. Daftarkan customer baru di atas.'}
@@ -588,40 +588,40 @@ export default function CustomersPage() {
         ) : (
           <>
             {/* Desktop Table View */}
-            <div className="hidden md:block border border-neutral-900 rounded-xl overflow-hidden bg-neutral-950/20">
+            <div className="hidden md:block border border-neutral-200 dark:border-neutral-900 rounded-xl overflow-hidden bg-white dark:bg-neutral-950/20 transition-colors">
               <Table>
-                <TableHeader className="bg-neutral-950/60">
-                  <TableRow className="border-b border-neutral-900 hover:bg-transparent">
-                    <TableHead className="text-neutral-400 font-semibold py-4">Email Customer</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold">Akun Induk</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold">Durasi</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold">Tanggal Habis</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold">Pembayaran</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold">Harga</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold">Status</TableHead>
-                    <TableHead className="text-neutral-400 font-semibold text-right py-4 pr-6">Aksi</TableHead>
+                <TableHeader className="bg-neutral-50/80 dark:bg-neutral-950/60">
+                  <TableRow className="border-b border-neutral-200 dark:border-neutral-900 hover:bg-transparent">
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold py-4">Email Customer</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Akun Induk</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Durasi</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Tanggal Habis</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Pembayaran</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Harga</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Status</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-right py-4 pr-6">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredSubs.map((sub) => {
                     const currentStatus = getSubscriptionStatus(sub.expiry_date);
                     return (
-                      <TableRow key={sub.id} className="border-b border-neutral-900 hover:bg-neutral-900/10 transition-colors">
-                        <TableCell className="font-medium text-neutral-200 py-4.5">{sub.customer_email}</TableCell>
-                        <TableCell className="text-neutral-300 text-xs">{getHostEmail(sub.host_account_id)}</TableCell>
-                        <TableCell className="text-neutral-300">{sub.duration_label}</TableCell>
-                        <TableCell className="text-neutral-300">
+                      <TableRow key={sub.id} className="border-b border-neutral-200 dark:border-neutral-900 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/10 transition-colors">
+                        <TableCell className="font-medium text-neutral-800 dark:text-neutral-200 py-4.5">{sub.customer_email}</TableCell>
+                        <TableCell className="text-neutral-500 dark:text-neutral-400 text-xs">{getHostEmail(sub.host_account_id)}</TableCell>
+                        <TableCell className="text-neutral-700 dark:text-neutral-700 dark:text-neutral-300">{sub.duration_label}</TableCell>
+                        <TableCell className="text-neutral-700 dark:text-neutral-700 dark:text-neutral-300">
                           <div className="flex items-center gap-2 text-xs">
-                            <Calendar className="h-3.5 w-3.5 text-neutral-500" />
+                            <Calendar className="h-3.5 w-3.5 text-neutral-405 dark:text-neutral-500" />
                             <span>{formatIndonesianDate(sub.expiry_date)}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-300">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-700 dark:text-neutral-300">
                             {sub.payment_channel}
                           </span>
                         </TableCell>
-                        <TableCell className="text-neutral-300 font-medium">{formatRupiah(sub.price)}</TableCell>
+                        <TableCell className="text-neutral-800 dark:text-neutral-800 dark:text-neutral-300 font-medium">{formatRupiah(sub.price)}</TableCell>
                         <TableCell>
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
                             currentStatus === 'aktif'
@@ -646,7 +646,7 @@ export default function CustomersPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => handleRenewOpen(sub)}
-                              className="h-8 border-neutral-800 bg-neutral-900 hover:bg-purple-950/30 hover:text-purple-400 hover:border-purple-900/40 gap-1.5 text-xs text-neutral-300"
+                              className="h-8 border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 hover:bg-purple-50 dark:hover:bg-purple-950/30 text-neutral-700 hover:text-purple-600 dark:text-neutral-300 dark:hover:text-purple-400 border hover:border-purple-200 dark:hover:border-purple-900/40 gap-1.5 text-xs font-medium"
                             >
                               <RefreshCw className="h-3.5 w-3.5" />
                               <span>Perpanjang</span>
@@ -655,7 +655,7 @@ export default function CustomersPage() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeleteOpen(sub)}
-                              className="h-8 w-8 text-neutral-500 hover:text-red-400 hover:bg-red-950/20"
+                              className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-red-650 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-955/20"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -673,11 +673,11 @@ export default function CustomersPage() {
               {filteredSubs.map((sub) => {
                 const currentStatus = getSubscriptionStatus(sub.expiry_date);
                 return (
-                  <div key={sub.id} className="border border-neutral-900 rounded-xl bg-neutral-950/20 p-5 space-y-4">
+                  <div key={sub.id} className="border border-neutral-200 dark:border-neutral-900 rounded-xl bg-white dark:bg-neutral-950/20 p-5 space-y-4 shadow-sm transition-colors">
                     <div className="flex items-start justify-between gap-3">
                       <div className="overflow-hidden">
-                        <h4 className="font-semibold text-neutral-200 truncate">{sub.customer_email}</h4>
-                        <span className="text-[10px] text-neutral-500 block mt-1 overflow-hidden text-ellipsis">
+                        <h4 className="font-semibold text-neutral-800 dark:text-neutral-200 truncate">{sub.customer_email}</h4>
+                        <span className="text-[10px] text-neutral-500 dark:text-neutral-400 block mt-1 overflow-hidden text-ellipsis">
                           Host: {getHostEmail(sub.host_account_id)}
                         </span>
                       </div>
@@ -696,23 +696,23 @@ export default function CustomersPage() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 py-3 border-y border-neutral-900/60 text-xs">
+                    <div className="grid grid-cols-2 gap-4 py-3 border-y border-neutral-200 dark:border-neutral-900/60 text-xs">
                       <div>
-                        <span className="text-neutral-500 block mb-1">Durasi / Harga</span>
-                        <strong className="text-neutral-300 block">{sub.duration_label}</strong>
-                        <span className="text-neutral-400 text-[10px]">{formatRupiah(sub.price)}</span>
+                        <span className="text-neutral-500 dark:text-neutral-400 block mb-1">Durasi / Harga</span>
+                        <strong className="text-neutral-700 dark:text-neutral-300 block">{sub.duration_label}</strong>
+                        <span className="text-neutral-500 dark:text-neutral-400 text-[10px]">{formatRupiah(sub.price)}</span>
                       </div>
                       <div>
-                        <span className="text-neutral-500 block mb-1">Metode Bayar</span>
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-300">
+                        <span className="text-neutral-500 dark:text-neutral-400 block mb-1">Metode Bayar</span>
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-700 dark:text-neutral-300">
                           {sub.payment_channel}
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between text-xs pt-1">
-                      <div className="flex items-center gap-2 text-neutral-400">
-                        <Calendar className="h-4 w-4 text-neutral-500" />
+                      <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+                        <Calendar className="h-4 w-4 text-neutral-405 dark:text-neutral-500" />
                         <span>Sampai: {formatIndonesianDate(sub.expiry_date)}</span>
                       </div>
                       <div className="flex gap-2">
@@ -720,7 +720,7 @@ export default function CustomersPage() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleRenewOpen(sub)}
-                          className="h-8 border-neutral-800 bg-neutral-900 text-xs"
+                          className="h-8 border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                         >
                           <RefreshCw className="h-3.5 w-3.5" />
                         </Button>
@@ -728,7 +728,7 @@ export default function CustomersPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDeleteOpen(sub)}
-                          className="h-8 w-8 text-neutral-500 hover:text-red-400"
+                          className="h-8 w-8 text-neutral-500 dark:text-neutral-400 hover:text-red-500"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -744,10 +744,10 @@ export default function CustomersPage() {
 
       {/* Add Subscription Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="border-neutral-800 bg-[#0c0c0e] text-neutral-100 max-w-md rounded-2xl">
+        <DialogContent className="border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0c0c0e] text-neutral-805 dark:text-neutral-100 max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-neutral-100">Tambah Customer Baru</DialogTitle>
-            <DialogDescription className="text-neutral-400 text-xs">
+            <DialogTitle className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Tambah Customer Baru</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-xs">
               Daftarkan subscription baru untuk customer premium.
             </DialogDescription>
           </DialogHeader>
@@ -761,7 +761,7 @@ export default function CustomersPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="cust-email" className="text-xs font-semibold text-neutral-300">Email Customer</Label>
+              <Label htmlFor="cust-email" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Email Customer</Label>
               <Input
                 id="cust-email"
                 type="email"
@@ -769,17 +769,17 @@ export default function CustomersPage() {
                 value={customerEmail}
                 onChange={(e) => setCustomerEmail(e.target.value)}
                 required
-                className="bg-neutral-950 border-neutral-800 text-neutral-100 placeholder:text-neutral-700"
+                className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-805 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-700"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cust-host" className="text-xs font-semibold text-neutral-300">Akun Induk (Host Account)</Label>
+              <Label htmlFor="cust-host" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Akun Induk (Host Account)</Label>
               <Select value={hostAccountId} onValueChange={(val) => { if (val) setHostAccountId(val); }}>
-                <SelectTrigger id="cust-host" className="bg-neutral-950 border-neutral-800 text-neutral-200">
+                <SelectTrigger id="cust-host" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                   <SelectValue placeholder={availableHosts.length === 0 ? "Tidak ada slot kosong!" : "Pilih Akun Induk"} />
                 </SelectTrigger>
-                <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200">
+                <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
                   {availableHosts.map(host => (
                     <SelectItem key={host.id} value={host.id || ''}>
                       {host.account_email} (Sisa: {getHostSisaSlot(host)} Slot)
@@ -796,24 +796,24 @@ export default function CustomersPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="cust-start" className="text-xs font-semibold text-neutral-300">Tanggal Mulai</Label>
+                <Label htmlFor="cust-start" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Tanggal Mulai</Label>
                 <Input
                   id="cust-start"
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                   required
-                  className="bg-neutral-950 border-neutral-800 text-neutral-100"
+                  className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-805 dark:text-neutral-100"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cust-preset" className="text-xs font-semibold text-neutral-300">Pilih Durasi</Label>
+                <Label htmlFor="cust-preset" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Pilih Durasi</Label>
                 <Select value={durationPreset} onValueChange={(val) => { if (val) setDurationPreset(val); }}>
-                  <SelectTrigger id="cust-preset" className="bg-neutral-950 border-neutral-800 text-neutral-200">
+                  <SelectTrigger id="cust-preset" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                     <SelectValue placeholder="Pilih durasi" />
                   </SelectTrigger>
-                  <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200">
+                  <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
                     <SelectItem value="3_hari">3 Hari</SelectItem>
                     <SelectItem value="1_minggu">1 Minggu</SelectItem>
                     <SelectItem value="1_bulan">1 Bulan</SelectItem>
@@ -827,28 +827,28 @@ export default function CustomersPage() {
             </div>
 
             {durationPreset === 'custom' && (
-              <div className="grid grid-cols-2 gap-4 bg-neutral-950/40 p-3 rounded-lg border border-neutral-900">
+              <div className="grid grid-cols-2 gap-4 bg-neutral-50/50 dark:bg-neutral-950/40 p-3 rounded-lg border border-neutral-200 dark:border-neutral-900">
                 <div className="space-y-1">
-                  <Label htmlFor="custom-val" className="text-[10px] text-neutral-400">Jumlah</Label>
+                  <Label htmlFor="custom-val" className="text-[10px] text-neutral-500 dark:text-neutral-400">Jumlah</Label>
                   <Input
                     id="custom-val"
                     type="number"
                     min={1}
                     value={customDurationValue}
                     onChange={(e) => setCustomDurationValue(Number(e.target.value))}
-                    className="bg-neutral-950 border-neutral-800 h-8 text-neutral-200 text-xs"
+                    className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 h-8 text-neutral-800 dark:text-neutral-202 text-xs"
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="custom-unit" className="text-[10px] text-neutral-400">Satuan</Label>
+                  <Label htmlFor="custom-unit" className="text-[10px] text-neutral-500 dark:text-neutral-400">Satuan</Label>
                   <Select 
                     value={customDurationUnit} 
                     onValueChange={(val) => { if (val) setCustomDurationUnit(val as any); }}
                   >
-                    <SelectTrigger id="custom-unit" className="bg-neutral-950 border-neutral-800 h-8 text-neutral-200 text-xs">
+                    <SelectTrigger id="custom-unit" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 h-8 text-neutral-800 dark:text-neutral-202 text-xs">
                       <SelectValue placeholder="Pilih" />
                     </SelectTrigger>
-                    <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200 text-xs">
+                    <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202 text-xs">
                       <SelectItem value="days">Hari</SelectItem>
                       <SelectItem value="weeks">Minggu</SelectItem>
                       <SelectItem value="months">Bulan</SelectItem>
@@ -862,7 +862,7 @@ export default function CustomersPage() {
             {/* Custom Payment Channel Addition */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="cust-payment" className="text-xs font-semibold text-neutral-300">Metode Pembayaran</Label>
+                <Label htmlFor="cust-payment" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Metode Pembayaran</Label>
                 <button
                   type="button"
                   onClick={() => setShowAddChannel(!showAddChannel)}
@@ -879,7 +879,7 @@ export default function CustomersPage() {
                     placeholder="Nama metode baru (misal: Gopay)"
                     value={newPaymentChannel}
                     onChange={(e) => setNewPaymentChannel(e.target.value)}
-                    className="bg-neutral-950 border-neutral-800 text-neutral-100 placeholder:text-neutral-700 h-9 text-xs"
+                    className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-700 h-9 text-xs"
                   />
                   <Button
                     type="button"
@@ -891,10 +891,10 @@ export default function CustomersPage() {
                 </div>
               ) : (
                 <Select value={paymentChannel} onValueChange={(val) => { if (val) setPaymentChannel(val); }}>
-                  <SelectTrigger id="cust-payment" className="bg-neutral-950 border-neutral-800 text-neutral-200">
+                  <SelectTrigger id="cust-payment" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                     <SelectValue placeholder="Pilih Pembayaran" />
                   </SelectTrigger>
-                  <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200">
+                  <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
                     {paymentChannels.map(channel => (
                       <SelectItem key={channel} value={channel}>
                         {channel}
@@ -907,7 +907,7 @@ export default function CustomersPage() {
 
             <div className="grid grid-cols-2 gap-4 items-end">
               <div className="space-y-2">
-                <Label htmlFor="cust-price" className="text-xs font-semibold text-neutral-300">Pendapatan (Rupiah)</Label>
+                <Label htmlFor="cust-price" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Pendapatan (Rupiah)</Label>
                 <Input
                   id="cust-price"
                   type="number"
@@ -915,14 +915,14 @@ export default function CustomersPage() {
                   value={price}
                   onChange={(e) => setPrice(Number(e.target.value))}
                   required
-                  className="bg-neutral-950 border-neutral-800 text-neutral-100"
+                  className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-805 dark:text-neutral-100"
                 />
               </div>
 
               {/* Expiry date preview */}
-              <div className="bg-neutral-950 p-2.5 rounded-lg border border-neutral-900 text-xs shrink-0 h-10 flex items-center justify-between">
+              <div className="bg-neutral-50 dark:bg-neutral-950 p-2.5 rounded-lg border border-neutral-200 dark:border-neutral-900 text-xs shrink-0 h-10 flex items-center justify-between">
                 <span className="text-neutral-500 text-[10px]">Habis:</span>
-                <strong className="text-purple-400 font-semibold">{formatIndonesianDate(calculatedExpiryPreview)}</strong>
+                <strong className="text-purple-650 dark:text-purple-400 font-semibold">{formatIndonesianDate(calculatedExpiryPreview)}</strong>
               </div>
             </div>
 
@@ -931,7 +931,7 @@ export default function CustomersPage() {
                 type="button"
                 variant="ghost"
                 onClick={() => setIsFormOpen(false)}
-                className="text-neutral-400 hover:text-white hover:bg-neutral-900/60"
+                className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900/60"
               >
                 Batal
               </Button>
@@ -956,10 +956,10 @@ export default function CustomersPage() {
 
       {/* Renew Subscription Dialog */}
       <Dialog open={isRenewOpen} onOpenChange={setIsRenewOpen}>
-        <DialogContent className="border-neutral-800 bg-[#0c0c0e] text-neutral-100 max-w-md rounded-2xl">
+        <DialogContent className="border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0c0c0e] text-neutral-805 dark:text-neutral-100 max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-neutral-100">Perpanjang Subscription</DialogTitle>
-            <DialogDescription className="text-neutral-400 text-xs">
+            <DialogTitle className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Perpanjang Subscription</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-xs">
               Buat baris subscription baru untuk customer <strong>{currentSub?.customer_email}</strong>.
             </DialogDescription>
           </DialogHeader>
@@ -974,12 +974,12 @@ export default function CustomersPage() {
 
             {/* Extension Date Start Selection */}
             <div className="space-y-2">
-              <Label className="text-xs font-semibold text-neutral-300">Mulai Perpanjangan Dari</Label>
+              <Label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Mulai Perpanjangan Dari</Label>
               <Select value={renewFromOldExpiry} onValueChange={(val) => { if (val) setRenewFromOldExpiry(val); }}>
-                <SelectTrigger className="bg-neutral-950 border-neutral-800 text-neutral-200">
+                <SelectTrigger className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                   <SelectValue placeholder="Pilih Mulai" />
                 </SelectTrigger>
-                <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200">
+                <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
                   <SelectItem value="true">
                     Lanjutkan Masa Aktif Lama ({currentSub ? formatIndonesianDate(currentSub.expiry_date) : ''})
                   </SelectItem>
@@ -991,12 +991,12 @@ export default function CustomersPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="renew-host" className="text-xs font-semibold text-neutral-300">Akun Induk (Bisa Diubah)</Label>
+              <Label htmlFor="renew-host" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Akun Induk (Bisa Diubah)</Label>
               <Select value={renewHostAccountId} onValueChange={(val) => { if (val) setRenewHostAccountId(val); }}>
-                <SelectTrigger id="renew-host" className="bg-neutral-950 border-neutral-800 text-neutral-200">
+                <SelectTrigger id="renew-host" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                   <SelectValue placeholder="Pilih Akun Induk" />
                 </SelectTrigger>
-                <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200">
+                <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
                   {hostAccounts.map(host => {
                     const isSameHost = host.id === currentSub?.host_account_id;
                     const sisa = getHostSisaSlot(host);
@@ -1016,12 +1016,12 @@ export default function CustomersPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="renew-preset" className="text-xs font-semibold text-neutral-300">Pilih Durasi Tambahan</Label>
+                <Label htmlFor="renew-preset" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Pilih Durasi Tambahan</Label>
                 <Select value={renewDurationPreset} onValueChange={(val) => { if (val) setRenewDurationPreset(val); }}>
-                  <SelectTrigger id="renew-preset" className="bg-neutral-950 border-neutral-800 text-neutral-200">
+                  <SelectTrigger id="renew-preset" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                     <SelectValue placeholder="Pilih durasi" />
                   </SelectTrigger>
-                  <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200">
+                  <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
                     <SelectItem value="3_hari">3 Hari</SelectItem>
                     <SelectItem value="1_minggu">1 Minggu</SelectItem>
                     <SelectItem value="1_bulan">1 Bulan</SelectItem>
@@ -1034,7 +1034,7 @@ export default function CustomersPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="renew-price" className="text-xs font-semibold text-neutral-300">Harga Perpanjangan (Rp)</Label>
+                <Label htmlFor="renew-price" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Harga Perpanjangan (Rp)</Label>
                 <Input
                   id="renew-price"
                   type="number"
@@ -1042,34 +1042,34 @@ export default function CustomersPage() {
                   value={renewPrice}
                   onChange={(e) => setRenewPrice(Number(e.target.value))}
                   required
-                  className="bg-neutral-950 border-neutral-800 text-neutral-100"
+                  className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-805 dark:text-neutral-100"
                 />
               </div>
             </div>
 
             {renewDurationPreset === 'custom' && (
-              <div className="grid grid-cols-2 gap-4 bg-neutral-950/40 p-3 rounded-lg border border-neutral-900">
+              <div className="grid grid-cols-2 gap-4 bg-neutral-50/50 dark:bg-neutral-950/40 p-3 rounded-lg border border-neutral-200 dark:border-neutral-900">
                 <div className="space-y-1">
-                  <Label htmlFor="renew-custom-val" className="text-[10px] text-neutral-400">Jumlah</Label>
+                  <Label htmlFor="renew-custom-val" className="text-[10px] text-neutral-500 dark:text-neutral-400">Jumlah</Label>
                   <Input
                     id="renew-custom-val"
                     type="number"
                     min={1}
                     value={renewCustomDurationValue}
                     onChange={(e) => setRenewCustomDurationValue(Number(e.target.value))}
-                    className="bg-neutral-950 border-neutral-800 h-8 text-neutral-200 text-xs"
+                    className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 h-8 text-neutral-800 dark:text-neutral-202 text-xs"
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="renew-custom-unit" className="text-[10px] text-neutral-400">Satuan</Label>
+                  <Label htmlFor="renew-custom-unit" className="text-[10px] text-neutral-500 dark:text-neutral-400">Satuan</Label>
                   <Select 
                     value={renewCustomDurationUnit} 
                     onValueChange={(val) => { if (val) setRenewCustomDurationUnit(val as any); }}
                   >
-                    <SelectTrigger id="renew-custom-unit" className="bg-neutral-950 border-neutral-800 h-8 text-neutral-200 text-xs">
+                    <SelectTrigger id="renew-custom-unit" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 h-8 text-neutral-800 dark:text-neutral-202 text-xs">
                       <SelectValue placeholder="Pilih" />
                     </SelectTrigger>
-                    <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200 text-xs">
+                    <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202 text-xs">
                       <SelectItem value="days">Hari</SelectItem>
                       <SelectItem value="weeks">Minggu</SelectItem>
                       <SelectItem value="months">Bulan</SelectItem>
@@ -1083,7 +1083,7 @@ export default function CustomersPage() {
             {/* Custom Payment Channel Addition (Renew) */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="renew-payment" className="text-xs font-semibold text-neutral-300">Metode Pembayaran</Label>
+                <Label htmlFor="renew-payment" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Metode Pembayaran</Label>
                 <button
                   type="button"
                   onClick={() => setShowAddChannel(!showAddChannel)}
@@ -1100,7 +1100,7 @@ export default function CustomersPage() {
                     placeholder="Nama metode baru (misal: Shopeepay)"
                     value={newPaymentChannel}
                     onChange={(e) => setNewPaymentChannel(e.target.value)}
-                    className="bg-neutral-950 border-neutral-800 text-neutral-100 placeholder:text-neutral-700 h-9 text-xs"
+                    className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-700 h-9 text-xs"
                   />
                   <Button
                     type="button"
@@ -1112,10 +1112,10 @@ export default function CustomersPage() {
                 </div>
               ) : (
                 <Select value={renewPaymentChannel} onValueChange={(val) => { if (val) setRenewPaymentChannel(val); }}>
-                  <SelectTrigger id="renew-payment" className="bg-neutral-950 border-neutral-800 text-neutral-200">
+                  <SelectTrigger id="renew-payment" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                     <SelectValue placeholder="Pilih Pembayaran" />
                   </SelectTrigger>
-                  <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200">
+                  <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
                     {paymentChannels.map(channel => (
                       <SelectItem key={channel} value={channel}>
                         {channel}
@@ -1126,9 +1126,9 @@ export default function CustomersPage() {
               )}
             </div>
 
-            <div className="bg-neutral-950 p-3.5 rounded-lg border border-neutral-900 text-xs flex items-center justify-between">
-              <span className="text-neutral-500">Masa Aktif Baru Sampai:</span>
-              <strong className="text-purple-400 font-semibold text-sm">
+            <div className="bg-neutral-50 dark:bg-neutral-950 p-3.5 rounded-lg border border-neutral-200 dark:border-neutral-900 text-xs flex items-center justify-between">
+              <span className="text-neutral-405 dark:text-neutral-500">Masa Aktif Baru Sampai:</span>
+              <strong className="text-purple-650 dark:text-purple-400 font-semibold text-sm">
                 {currentSub ? formatIndonesianDate(getRenewCalculatedExpiry()) : '-'}
               </strong>
             </div>
@@ -1138,7 +1138,7 @@ export default function CustomersPage() {
                 type="button"
                 variant="ghost"
                 onClick={() => setIsRenewOpen(false)}
-                className="text-neutral-400 hover:text-white hover:bg-neutral-900/60"
+                className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900/60"
               >
                 Batal
               </Button>
@@ -1163,10 +1163,10 @@ export default function CustomersPage() {
 
       {/* Delete / Deactivate Confirmation Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="border-neutral-800 bg-[#0c0c0e] text-neutral-100 max-w-sm rounded-2xl">
+        <DialogContent className="border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0c0c0e] text-neutral-800 dark:text-neutral-100 max-w-sm rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-neutral-100">Kelola Subscription</DialogTitle>
-            <DialogDescription className="text-neutral-400 text-xs">
+            <DialogTitle className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Kelola Subscription</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-xs">
               Pilih tindakan yang ingin dilakukan terhadap subscription <strong>{currentSub?.customer_email}</strong>.
             </DialogDescription>
           </DialogHeader>
@@ -1213,7 +1213,7 @@ export default function CustomersPage() {
               type="button"
               variant="ghost"
               onClick={() => setIsDeleteOpen(false)}
-              className="w-full text-neutral-400 hover:text-white hover:bg-neutral-900"
+              className="w-full text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-900"
             >
               Batal
             </Button>

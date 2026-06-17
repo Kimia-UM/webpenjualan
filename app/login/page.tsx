@@ -41,28 +41,28 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#070708] px-4 py-12 sm:px-6 lg:px-8">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-12 sm:px-6 lg:px-8 transition-colors duration-300">
       {/* Background Decorative Gradients */}
-      <div className="absolute top-0 left-1/4 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-900/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] translate-x-1/2 translate-y-1/2 rounded-full bg-indigo-900/10 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-900/10 dark:bg-purple-900/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] translate-x-1/2 translate-y-1/2 rounded-full bg-indigo-900/10 dark:bg-indigo-900/10 blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-md z-10">
         <div className="flex flex-col items-center mb-8">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-lg shadow-purple-900/20 mb-3">
             <KeyRound className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-neutral-900 via-neutral-700 to-neutral-500 dark:from-white dark:via-neutral-200 dark:to-neutral-400 bg-clip-text text-transparent">
             Admin Area
           </h1>
-          <p className="mt-2 text-sm text-neutral-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             Aplikasi Manajemen Sharing Akun
           </p>
         </div>
 
-        <Card className="border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl shadow-2xl shadow-black/40">
+        <Card className="border-neutral-200/80 dark:border-neutral-800/80 bg-white/70 dark:bg-neutral-900/40 backdrop-blur-xl shadow-2xl shadow-neutral-100/50 dark:shadow-black/40 transition-colors">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-xl font-semibold text-neutral-100">Masuk</CardTitle>
-            <CardDescription className="text-neutral-400 text-xs">
+            <CardTitle className="text-xl font-semibold text-neutral-800 dark:text-neutral-100">Masuk</CardTitle>
+            <CardDescription className="text-muted-foreground text-xs">
               Gunakan email dan kata sandi admin Anda
             </CardDescription>
           </CardHeader>
@@ -76,7 +76,7 @@ export default function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs font-semibold text-neutral-300">
+                <Label htmlFor="email" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">
                   Email
                 </Label>
                 <div className="relative">
@@ -90,13 +90,13 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="pl-10 bg-neutral-950/50 border-neutral-800/80 focus:border-purple-500/50 focus:ring-purple-500/20 text-neutral-100 placeholder:text-neutral-600"
+                    className="pl-10 bg-white dark:bg-neutral-950/50 border-neutral-200 dark:border-neutral-800/80 focus:border-purple-500/50 focus:ring-purple-500/20 text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-xs font-semibold text-neutral-300">
+                <Label htmlFor="password" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">
                   Kata Sandi
                 </Label>
                 <div className="relative">
@@ -110,7 +110,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="pl-10 bg-neutral-950/50 border-neutral-800/80 focus:border-purple-500/50 focus:ring-purple-500/20 text-neutral-100 placeholder:text-neutral-600"
+                    className="pl-10 bg-white dark:bg-neutral-950/50 border-neutral-200 dark:border-neutral-800/80 focus:border-purple-500/50 focus:ring-purple-500/20 text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
                   />
                 </div>
               </div>
@@ -134,7 +134,7 @@ export default function LoginPage() {
           </form>
         </Card>
 
-        <p className="mt-8 text-center text-xs text-neutral-600">
+        <p className="mt-8 text-center text-xs text-muted-foreground">
           Hanya untuk admin resmi. Akses tidak sah akan dicatat.
         </p>
       </div>
