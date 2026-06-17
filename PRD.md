@@ -13,7 +13,7 @@ Saat ini bisnis sharing akun premium (Lynk, Twitter, dll) dikelola lewat spreads
 1. **Manajemen Customer** — siapa beli, durasi berapa lama, kapan habis, akun induk mana yang dipakai, metode pembayaran, dan pendapatan per transaksi.
 2. **Manajemen Stok** — daftar akun induk (host account) yang dipakai untuk sharing, sisa slot yang masih bisa dijual, kategori periode billing, dan masa aktif akun induk itu sendiri.
 
-Cara manual ini punya tiga masalah utama: rawan lupa cek tanggal habis, hitung sisa slot manual jadi gampang salah, dan tidak ada rekap pendapatan otomatis. Aplikasi ini dibuat untuk menggantikan spreadsheet tersebut dengan dashboard web yang otomatis menghitung status dan mengirim reminder.
+Cara manual ini punya tiga masalah utama: rawan lupa cek tanggal habis, hitung sisa slot manual jadi gampang salah, dan tidak ada rekap pendapatan otomatis. Aplikasi ini dibuat untuk menggantikan spreadsheet tersebut dengan dashboard web yang otomatis menghitung status dan mengirim reminder. Selain itu cara ini kurang responsif jika digunakan di mobile.
 
 ## 2. Tujuan Produk
 
@@ -137,6 +137,7 @@ Pencarian email customer dan filter status di semua list/table.
   ```
 - Kenapa Telegram dan bukan WhatsApp di V1: Telegram Bot API gratis, setup-nya hanya butuh token bot tanpa verifikasi bisnis. WhatsApp baru bisa ditambahkan di V2 lewat provider seperti Fonnte/WhatsApp Cloud API kalau memang dibutuhkan nanti.
 
+
 ## 9. Non-Functional Requirements
 
 - Mobile-responsive — admin kemungkinan sering cek/update dari HP.
@@ -190,3 +191,5 @@ Disusun bertahap supaya bisa dibangun satu-per-satu lewat AI coding assistant, t
 - Tidak ada lagi customer yang kelewat reminder (0 keluhan "lupa diperpanjang").
 - Waktu cek status harian turun dari beberapa menit scroll spreadsheet jadi tinggal buka dashboard.
 - Total pendapatan bulanan langsung terlihat tanpa hitung manual.
+
+## 15. DATABASE
