@@ -617,7 +617,7 @@ export default function CustomersPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-700 dark:text-neutral-300">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 transition-colors">
                             {sub.payment_channel}
                           </span>
                         </TableCell>
@@ -704,7 +704,7 @@ export default function CustomersPage() {
                       </div>
                       <div>
                         <span className="text-neutral-500 dark:text-neutral-400 block mb-1">Metode Bayar</span>
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-700 dark:text-neutral-300">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 transition-colors">
                           {sub.payment_channel}
                         </span>
                       </div>
@@ -884,7 +884,7 @@ export default function CustomersPage() {
                   <Button
                     type="button"
                     onClick={handleAddPaymentChannel}
-                    className="bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs shrink-0"
+                    className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs shrink-0 transition-all"
                   >
                     Tambah
                   </Button>
@@ -1105,7 +1105,7 @@ export default function CustomersPage() {
                   <Button
                     type="button"
                     onClick={handleAddPaymentChannel}
-                    className="bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs shrink-0"
+                    className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs shrink-0 transition-all"
                   >
                     Tambah
                   </Button>
