@@ -1,0 +1,12 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "host_accounts": {
+      ".indexOn": ["status", "active_until"]
+    },
+    "subscriptions": {
+      ".indexOn": ["host_account_id", "status", "expiry_date"]
+    }
+  }
+}
