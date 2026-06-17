@@ -153,7 +153,7 @@ export async function POST(request: Request) {
         return host ? host.account_email : "Tidak dikenal";
       };
 
-      // Filter active customer subscriptions with less than 5 days left
+      // Filter active customer subscriptions with 5 days or less left
       const activeSubs = subscriptions
         .map((sub: any) => {
           const daysLeft = getRemainingDays(sub.expiry_date);
@@ -164,18 +164,18 @@ export async function POST(request: Request) {
             status: getSubscriptionStatus(sub.expiry_date),
           };
         })
-        .filter(
-          (sub: any) =>
-            sub.status !== "habis" && sub.daysLeft > 0 && sub.daysLeft < 5,
-        );
+        .filter((sub: any) => sub.status !== "habis" && sub.daysLeft <= 5)
+        .sort((a, b) => a.daysLeft - b.daysLeft);
 
-      let reply = "📅 *Infocustomer (Kurang dari 5 Hari):*\n\n";
+      let reply = "📅 *Infocustomer (Sisa ≤ 5 Hari Lagi):*\n\n";
       if (activeSubs.length === 0) {
         reply +=
           "❌ Tidak ada customer dengan sisa masa aktif kurang dari 5 hari.";
       } else {
         activeSubs.forEach((sub) => {
-          reply += `- \`${sub.email}\`\n  (Host: \`${sub.hostEmail}\`)\n`;
+          const dayLabel =
+            sub.daysLeft === 0 ? "Hari Ini" : `${sub.daysLeft} hari lagi`;
+          reply += `- \`${sub.email}\` - *${dayLabel}*\n  (Host: \`${sub.hostEmail}\`)\n`;
         });
       }
 
