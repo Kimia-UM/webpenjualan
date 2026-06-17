@@ -141,27 +141,25 @@ export async function POST(request: Request) {
         return host ? host.account_email : 'Tidak dikenal';
       };
 
-      // Filter active/expiring customer subscriptions, sort by expiry soonest
+      // Filter active customer subscriptions with exactly 5 days left
       const activeSubs = subscriptions
-        .filter((sub: any) => getSubscriptionStatus(sub.expiry_date) !== 'habis')
         .map((sub: any) => {
           const daysLeft = getRemainingDays(sub.expiry_date);
           return {
             email: sub.customer_email,
             hostEmail: getHostEmail(sub.host_account_id),
-            daysLeft
+            daysLeft,
+            status: getSubscriptionStatus(sub.expiry_date)
           };
         })
-        .sort((a, b) => a.daysLeft - b.daysLeft)
-        .slice(0, 10); // Limit to top 10 soonest for cleaner chat
+        .filter((sub: any) => sub.status !== 'habis' && sub.daysLeft === 5);
 
-      let reply = '📅 *Infocustomer (Waktu Habis Terdekat):*\n\n';
+      let reply = '📅 *Infocustomer (Sisa 5 Hari Lagi):*\n\n';
       if (activeSubs.length === 0) {
-        reply += '❌ Tidak ada customer aktif saat ini.';
+        reply += '❌ Tidak ada customer dengan sisa masa aktif tepat 5 hari lagi.';
       } else {
         activeSubs.forEach(sub => {
-          const dayLabel = sub.daysLeft === 0 ? 'Hari Ini' : `${sub.daysLeft} hari lagi`;
-          reply += `- \`${sub.email}\` - *${dayLabel}*\n  (Host: \`${sub.hostEmail}\`)\n`;
+          reply += `- \`${sub.email}\`\n  (Host: \`${sub.hostEmail}\`)\n`;
         });
       }
 
