@@ -8,14 +8,16 @@ import { auth } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { 
-  LayoutDashboard, 
-  Database, 
-  Users, 
-  FileText, 
-  LogOut, 
-  Menu, 
-  X 
+import {
+  LayoutDashboard,
+  Database,
+  Users,
+  FileText,
+  LogOut,
+  Menu,
+  X,
+  AppWindow,
+  ShieldCheck
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -35,6 +37,8 @@ export default function Navbar() {
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Stok Akun', href: '/stok', icon: Database },
     { name: 'Customers', href: '/customers', icon: Users },
+    { name: 'Apps Premium', href: '/apps-premium', icon: AppWindow },
+    { name: 'Privat Premium', href: '/privat-premium', icon: ShieldCheck },
     { name: 'Laporan', href: '/laporan', icon: FileText },
   ];
 
@@ -44,12 +48,12 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-md shadow-purple-900/20">
                 <Database className="h-5 w-5 text-white" />
               </div>
               <span className="font-bold text-lg bg-gradient-to-r from-neutral-900 via-neutral-700 to-neutral-500 dark:from-white dark:via-neutral-200 dark:to-neutral-400 bg-clip-text text-transparent transition-colors">
-                PremiumShare
+                j0eeys premiums
               </span>
             </Link>
 
@@ -62,11 +66,10 @@ export default function Navbar() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      isActive
-                        ? 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900/50'
-                        : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-900/40 border border-transparent'
-                    }`}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                      ? 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900/50'
+                      : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-900/40 border border-transparent'
+                      }`}
                   >
                     <Icon className="h-4 w-4" />
                     <span>{item.name}</span>
@@ -132,11 +135,10 @@ export default function Navbar() {
                   key={item.name}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    isActive
-                      ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900/40'
-                      : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-900/60 border border-transparent'
-                  }`}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive
+                    ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-900/40'
+                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-900/60 border border-transparent'
+                    }`}
                 >
                   <Icon className="h-4 w-4" />
                   <span>{item.name}</span>

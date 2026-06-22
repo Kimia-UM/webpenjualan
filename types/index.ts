@@ -35,3 +35,30 @@ export interface DashboardSummary {
   expiringSubscriptions: Subscription[];
   expiringHostAccounts: HostAccount[];
 }
+
+export interface AppsPremium {
+  id?: string;
+  app_name: string;
+  account: string;
+  password: string;
+  variation: string;
+  order_date: string;
+  expiry_date: string;
+  selling_price: number;
+  capital_price: number;
+  profit: number;
+  notes?: string;
+  created_at: number;
+}
+
+export interface PrivatPremium {
+  id?: string;
+  customer_name: string;
+  order_date: string;
+  selling_price: number;
+  capital_price: number;
+  profit: number;
+  notes?: string;
+  created_at: number;
+}
+

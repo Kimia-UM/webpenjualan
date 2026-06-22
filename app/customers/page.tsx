@@ -42,8 +42,12 @@ import {
   RefreshCw,
   Trash2,
   Loader2,
-  CreditCard
+  CreditCard,
+  Pencil,
+  TrendingUp,
+  DollarSign
 } from 'lucide-react';
+
 
 export default function CustomersPage() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
@@ -57,7 +61,18 @@ export default function CustomersPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isRenewOpen, setIsRenewOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [currentSub, setCurrentSub] = useState<Subscription | null>(null);
+
+  // Form Edit states
+  const [editForm, setEditForm] = useState({
+    customerEmail: '',
+    hostAccountId: '',
+    startDate: '',
+    expiryDate: '',
+    paymentChannel: '',
+    price: 0,
+  });
 
   // Form Add states
   const [customerEmail, setCustomerEmail] = useState('');
@@ -325,6 +340,90 @@ export default function CustomersPage() {
     setIsDeleteOpen(true);
   };
 
+  // Open Edit Dialog
+  const handleEditOpen = (sub: Subscription) => {
+    setCurrentSub(sub);
+    setEditForm({
+      customerEmail: sub.customer_email,
+      hostAccountId: sub.host_account_id,
+      startDate: sub.start_date || '',
+      expiryDate: sub.expiry_date || '',
+      paymentChannel: sub.payment_channel,
+      price: sub.price,
+    });
+    setFormError(null);
+    setIsEditOpen(true);
+  };
+
+  // Handle Edit Submit
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    setIsSubmitting(true);
+
+    if (!currentSub || !currentSub.id) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!editForm.customerEmail || !editForm.hostAccountId || !editForm.paymentChannel || editForm.price === undefined || !editForm.startDate || !editForm.expiryDate) {
+      setFormError('Semua field wajib diisi.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Verify host account changes if applicable
+    if (editForm.hostAccountId !== currentSub.host_account_id) {
+      const targetHost = hostAccounts.find(h => h.id === editForm.hostAccountId);
+      if (!targetHost) {
+        setFormError('Akun induk baru tidak ditemukan.');
+        setIsSubmitting(false);
+        return;
+      }
+      const sisa = getHostSisaSlot(targetHost);
+      if (sisa <= 0) {
+        setFormError('Gagal! Akun induk baru sudah penuh (0 slot tersisa).');
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
+    // Calculate duration_label based on editForm.startDate and editForm.expiryDate
+    const diffTime = new Date(editForm.expiryDate).getTime() - new Date(editForm.startDate).getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    let durationLabel = `${diffDays} hari`;
+    if (diffDays > 0) {
+      if (diffDays % 365 === 0) {
+        durationLabel = `${diffDays / 365} tahun`;
+      } else if (diffDays % 30 === 0) {
+        durationLabel = `${diffDays / 30} bulan`;
+      } else if (diffDays % 7 === 0) {
+        durationLabel = `${diffDays / 7} minggu`;
+      }
+    }
+
+    const editedFields = {
+      customer_email: editForm.customerEmail.trim().toLowerCase(),
+      host_account_id: editForm.hostAccountId,
+      duration_label: durationLabel,
+      start_date: editForm.startDate,
+      expiry_date: editForm.expiryDate,
+      payment_channel: editForm.paymentChannel,
+      price: Number(editForm.price),
+      status: getSubscriptionStatus(editForm.expiryDate)
+    };
+
+    try {
+      await update(ref(db, `subscriptions/${currentSub.id}`), { ...editedFields });
+      setIsEditOpen(false);
+    } catch (err: any) {
+      console.error('Error updating subscription:', err);
+      setFormError(err.message || 'Gagal mengubah data subscription.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Add Inline Payment Channel
   const handleAddPaymentChannel = async () => {
     if (!newPaymentChannel.trim()) return;
@@ -534,6 +633,44 @@ export default function CustomersPage() {
           </Button>
         </div>
 
+        {/* Individual Dashboard — Stats Overview */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="rounded-xl border border-neutral-200 dark:border-neutral-900 bg-neutral-50/50 dark:bg-neutral-950/20 p-4 flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400">
+              <Users className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider">Total Customer</span>
+            </div>
+            <p className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{subscriptions.length}</p>
+          </div>
+          <div className="rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10 p-4 flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider">Aktif</span>
+            </div>
+            <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+              {subscriptions.filter(s => getSubscriptionStatus(s.expiry_date) === 'aktif').length}
+            </p>
+          </div>
+          <div className="rounded-xl border border-amber-200/60 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/10 p-4 flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+              <Clock className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider">Akan Habis</span>
+            </div>
+            <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+              {subscriptions.filter(s => getSubscriptionStatus(s.expiry_date) === 'akan_habis').length}
+            </p>
+          </div>
+          <div className="rounded-xl border border-purple-200/60 dark:border-purple-900/40 bg-purple-50/40 dark:bg-purple-950/10 p-4 flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+              <DollarSign className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider">Total Pendapatan</span>
+            </div>
+            <p className="text-lg font-bold text-purple-700 dark:text-purple-400">
+              {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(subscriptions.reduce((sum, s) => sum + (s.price || 0), 0))}
+            </p>
+          </div>
+        </div>
+
         {/* Filter & Search Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6 items-start sm:items-center justify-between">
           <div className="relative w-full sm:max-w-md">
@@ -652,6 +789,15 @@ export default function CustomersPage() {
                               <span>Perpanjang</span>
                             </Button>
                             <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditOpen(sub)}
+                              className="h-8 border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-neutral-700 hover:text-blue-600 dark:text-neutral-300 dark:hover:text-blue-400 border hover:border-blue-200 dark:hover:border-blue-900/40 gap-1.5 text-xs font-medium"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                              <span>Edit</span>
+                            </Button>
+                            <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeleteOpen(sub)}
@@ -723,6 +869,14 @@ export default function CustomersPage() {
                           className="h-8 border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800"
                         >
                           <RefreshCw className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditOpen(sub)}
+                          className="h-8 border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900 text-xs text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -1163,61 +1317,214 @@ export default function CustomersPage() {
 
       {/* Delete / Deactivate Confirmation Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <DialogContent className="border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0c0c0e] text-neutral-800 dark:text-neutral-100 max-w-sm rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Kelola Subscription</DialogTitle>
-            <DialogDescription className="text-muted-foreground text-xs">
-              Pilih tindakan yang ingin dilakukan terhadap subscription <strong>{currentSub?.customer_email}</strong>.
+        <DialogContent className="border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111113] text-neutral-800 dark:text-neutral-100 max-w-sm rounded-2xl p-6">
+          {/* Icon + Header */}
+          <div className="flex flex-col items-center text-center mb-2">
+            <div className="h-12 w-12 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-center justify-center mb-4">
+              <Trash2 className="h-6 w-6 text-red-500" />
+            </div>
+            <DialogTitle className="text-base font-bold text-neutral-900 dark:text-neutral-100">
+              Hapus Customer?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 leading-relaxed">
+              Pilih tindakan untuk subscription<br />
+              <span className="font-semibold text-neutral-700 dark:text-neutral-300">{currentSub?.customer_email}</span>
             </DialogDescription>
-          </DialogHeader>
+          </div>
 
           {formError && (
-            <div className="flex items-center gap-2.5 rounded-lg border border-red-500/20 bg-red-950/20 p-3.5 text-xs text-red-400 my-2">
+            <div className="flex items-center gap-2.5 rounded-lg border border-red-500/20 bg-red-50 dark:bg-red-950/20 p-3 text-xs text-red-500 dark:text-red-400 mb-2">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{formError}</span>
             </div>
           )}
 
-          <div className="flex flex-col gap-3 py-4">
-            <Button
+          <div className="flex flex-col gap-2.5 mt-2">
+            {/* Nonaktifkan */}
+            <button
               type="button"
-              variant="outline"
               onClick={() => handleDelete(false)}
               disabled={isSubmitting}
-              className="w-full border-amber-600/30 hover:border-amber-500 bg-amber-950/10 hover:bg-amber-950/30 text-amber-300 justify-start px-4 h-12 text-left text-xs gap-3"
+              className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-amber-200 dark:border-amber-500/25 bg-amber-50 dark:bg-amber-500/10 hover:bg-amber-100 dark:hover:bg-amber-500/20 hover:border-amber-300 dark:hover:border-amber-500/40 transition-all duration-150 text-left disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <XCircle className="h-5 w-5 shrink-0" />
-              <div>
-                <strong className="block font-semibold">Nonaktifkan Saja</strong>
-                <span className="text-[10px] text-amber-400/80">Status diubah menjadi "Habis". Slot akun induk akan langsung dibebaskan.</span>
+              <div className="h-9 w-9 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center shrink-0">
+                <XCircle className="h-4.5 w-4.5 text-amber-600 dark:text-amber-400" />
               </div>
-            </Button>
+              <div>
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Nonaktifkan Saja</p>
+                <p className="text-[11px] text-amber-600/80 dark:text-amber-400/70 mt-0.5">Ubah status ke "Habis", slot dibebaskan.</p>
+              </div>
+            </button>
 
-            <Button
+            {/* Hapus Permanen */}
+            <button
               type="button"
-              variant="outline"
               onClick={() => handleDelete(true)}
               disabled={isSubmitting}
-              className="w-full border-red-600/30 hover:border-red-500 bg-red-950/10 hover:bg-red-950/30 text-red-300 justify-start px-4 h-12 text-left text-xs gap-3"
+              className="group w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-red-200 dark:border-red-500/25 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 hover:border-red-300 dark:hover:border-red-500/40 transition-all duration-150 text-left disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Trash2 className="h-5 w-5 shrink-0" />
-              <div>
-                <strong className="block font-semibold">Hapus Permanen</strong>
-                <span className="text-[10px] text-red-400/80">Hapus baris data subscription ini sepenuhnya dari database.</span>
+              <div className="h-9 w-9 rounded-xl bg-red-100 dark:bg-red-500/20 flex items-center justify-center shrink-0">
+                <Trash2 className="h-4.5 w-4.5 text-red-600 dark:text-red-400" />
               </div>
-            </Button>
+              <div>
+                <p className="text-sm font-semibold text-red-800 dark:text-red-300">Hapus Permanen</p>
+                <p className="text-[11px] text-red-600/80 dark:text-red-400/70 mt-0.5">Hapus data dari database secara permanen.</p>
+              </div>
+            </button>
           </div>
 
-          <DialogFooter className="pt-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setIsDeleteOpen(false)}
-              className="w-full text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-900"
-            >
-              Batal
-            </Button>
-          </DialogFooter>
+          {/* Cancel */}
+          <button
+            type="button"
+            onClick={() => setIsDeleteOpen(false)}
+            disabled={isSubmitting}
+            className="mt-4 w-full py-2.5 rounded-xl text-sm text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700 transition-all duration-150 font-medium"
+          >
+            Batal
+          </button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Subscription Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0c0c0e] text-neutral-805 dark:text-neutral-100 max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Edit Subscription</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-xs">
+              Ubah data subscription untuk customer.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleEditSubmit} className="space-y-4 py-2">
+            {formError && (
+              <div className="flex items-center gap-2.5 rounded-lg border border-red-500/20 bg-red-950/20 p-3.5 text-xs text-red-400">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{formError}</span>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-cust-email" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Email Customer</Label>
+              <Input
+                id="edit-cust-email"
+                type="email"
+                placeholder="customer@email.com"
+                value={editForm.customerEmail}
+                onChange={(e) => setEditForm({ ...editForm, customerEmail: e.target.value })}
+                required
+                className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-805 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-700"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-cust-host" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Akun Induk (Host Account)</Label>
+              <Select 
+                value={editForm.hostAccountId} 
+                onValueChange={(val) => { if (val) setEditForm({ ...editForm, hostAccountId: val }); }}
+              >
+                <SelectTrigger id="edit-cust-host" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
+                  <SelectValue placeholder="Pilih Akun Induk" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
+                  {hostAccounts.map(host => {
+                    const isSameHost = host.id === currentSub?.host_account_id;
+                    const sisa = getHostSisaSlot(host);
+                    if (host.status === 'aktif' || isSameHost) {
+                      return (
+                        <SelectItem key={host.id} value={host.id || ''}>
+                          {host.account_email} {isSameHost ? '(Akun Saat Ini)' : `(Sisa: ${sisa} Slot)`}
+                        </SelectItem>
+                      );
+                    }
+                    return null;
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-cust-start" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Tanggal Mulai</Label>
+                <Input
+                  id="edit-cust-start"
+                  type="date"
+                  value={editForm.startDate}
+                  onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
+                  required
+                  className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-805 dark:text-neutral-100"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-cust-expiry" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Tanggal Habis</Label>
+                <Input
+                  id="edit-cust-expiry"
+                  type="date"
+                  value={editForm.expiryDate}
+                  onChange={(e) => setEditForm({ ...editForm, expiryDate: e.target.value })}
+                  required
+                  className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-805 dark:text-neutral-100"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-cust-payment" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Metode Pembayaran</Label>
+              <Select 
+                value={editForm.paymentChannel} 
+                onValueChange={(val) => { if (val) setEditForm({ ...editForm, paymentChannel: val }); }}
+              >
+                <SelectTrigger id="edit-cust-payment" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
+                  <SelectValue placeholder="Pilih Pembayaran" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
+                  {paymentChannels.map(channel => (
+                    <SelectItem key={channel} value={channel}>
+                      {channel}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit-cust-price" className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Harga (Rupiah)</Label>
+              <Input
+                id="edit-cust-price"
+                type="number"
+                min={0}
+                value={editForm.price}
+                onChange={(e) => setEditForm({ ...editForm, price: Number(e.target.value) })}
+                required
+                className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-805 dark:text-neutral-100"
+              />
+            </div>
+
+            <DialogFooter className="pt-4 gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsEditOpen(false)}
+                className="text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900/60"
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium shadow-md shadow-blue-900/10"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Menyimpan...
+                  </>
+                ) : (
+                  'Simpan Perubahan'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

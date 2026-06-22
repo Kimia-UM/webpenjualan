@@ -41,7 +41,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
-  XCircle
+  XCircle,
+  Users
 } from 'lucide-react';
 
 export default function StokPage() {
@@ -271,6 +272,38 @@ export default function StokPage() {
             <Plus className="h-4.5 w-4.5" />
             <span>Tambah Akun</span>
           </Button>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="rounded-xl border border-neutral-200 dark:border-neutral-900 bg-neutral-50/50 dark:bg-neutral-950/20 p-4">
+            <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400 mb-1">
+              <Database className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Total Akun Induk</span>
+            </div>
+            <p className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{hostAccounts.length}</p>
+          </div>
+          <div className="rounded-xl border border-emerald-200/60 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/10 p-4">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-1">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Slot Tersedia (Aktif)</span>
+            </div>
+            <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+              {hostAccounts.filter(h => h.status === 'aktif').reduce((sum, h) => sum + (h.id ? getSisaSlot(h.id, h.total_slot) : h.total_slot), 0)}
+            </p>
+          </div>
+          <div className="rounded-xl border border-indigo-200/60 dark:border-indigo-900/40 bg-indigo-50/40 dark:bg-indigo-950/10 p-4">
+            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-1">
+              <Users className="h-3.5 w-3.5" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Slot Terpakai (Aktif)</span>
+            </div>
+            <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-400">
+              {hostAccounts.filter(h => h.status === 'aktif').reduce((sum, h) => {
+                 const sisa = h.id ? getSisaSlot(h.id, h.total_slot) : h.total_slot;
+                 return sum + (h.total_slot - sisa);
+              }, 0)}
+            </p>
+          </div>
         </div>
 
         {/* Search Bar */}
