@@ -52,3 +52,13 @@ serviceAccountKey.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# next-pwa generated files
+/public/sw.js
+/public/sw.js.map
+/public/workbox-*.js
+/public/workbox-*.js.map
+/public/fallback-*.js
+/public/fallback-*.js.map
+/public/swe-worker-*.js
+/public/swe-worker-*.js.map
