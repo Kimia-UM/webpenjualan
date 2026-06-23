@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.webpenjualan.twa",
+        "sha256_cert_fingerprints": ["41:5B:5E:69:73:C2:4B:A0:E1:36:31:2C:EB:8F:83:59:3C:C0:FA:A8:21:9F:71:E5:BE:0F:E0:68:EA:14:75:CE"]
+      }
+    }]
