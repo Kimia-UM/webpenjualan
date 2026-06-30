@@ -183,6 +183,7 @@ export async function POST(request: Request) {
 
     // 5. Handle standard slash commands
     if (text === "/start" || text === "/help") {
+      const helpMsg =
         `✨ *PremiumShare Bot Assistant* ✨\n\n` +
         `Halo Admin! 👋 Saya siap membantu Anda mengelola data.\n\n` +
         `📋 *Daftar Perintah:*\n` +
