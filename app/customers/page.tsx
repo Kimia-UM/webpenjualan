@@ -170,7 +170,7 @@ export default function CustomersPage() {
     
     if (diffDays < 0) {
       return 'habis';
-    } else if (diffDays <= 3) {
+    } else if (diffDays <= 1) {
       return 'akan_habis';
     } else {
       return 'aktif';
@@ -695,7 +695,7 @@ export default function CustomersPage() {
               <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-202">
                 <SelectItem value="semua">Semua</SelectItem>
                 <SelectItem value="aktif">Aktif</SelectItem>
-                <SelectItem value="akan_habis">Akan Habis (≤3 hari)</SelectItem>
+                <SelectItem value="akan_habis">Akan Habis (≤1 hari)</SelectItem>
                 <SelectItem value="habis">Habis</SelectItem>
               </SelectContent>
             </Select>

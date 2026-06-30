@@ -136,7 +136,7 @@ export default function AppsPremiumDashboardPage() {
               <div className="flex items-center justify-between p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-amber-500" />
-                  <span className="text-sm font-medium text-amber-700 dark:text-amber-400">Akan Habis (≤3 hari)</span>
+                  <span className="text-sm font-medium text-amber-700 dark:text-amber-400">Akan Habis (≤1 hari)</span>
                 </div>
                 <span className="text-lg font-bold text-amber-600 dark:text-amber-400">{akanHabis.length}</span>
               </div>

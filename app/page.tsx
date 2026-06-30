@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activityDate, setActivityDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [expiryViewDate, setExpiryViewDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     const subsRef = ref(db, 'subscriptions');
@@ -87,7 +88,7 @@ export default function DashboardPage() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) return 'habis';
-    if (diffDays <= 3) return 'akan_habis';
+    if (diffDays <= 1) return 'akan_habis';
     return 'aktif';
   };
 
@@ -183,13 +184,18 @@ export default function DashboardPage() {
     return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   };
 
-  // Customers expiring in <= 3 days (excluding already expired)
+  // Navigate expiry view date
+  const shiftExpiryDate = (days: number) => {
+    const d = new Date(expiryViewDate);
+    d.setDate(d.getDate() + days);
+    setExpiryViewDate(d.toISOString().split('T')[0]);
+  };
+  const isExpiryViewToday = expiryViewDate === todayStr;
+
+  // Customers expiring on the selected expiryViewDate (exact match)
   const expiringCustomers = subscriptions
-    .filter(sub => {
-      const status = getSubscriptionStatus(sub.expiry_date);
-      return status === 'akan_habis';
-    })
-    .sort((a, b) => new Date(a.expiry_date).getTime() - new Date(b.expiry_date).getTime());
+    .filter(sub => sub.expiry_date === expiryViewDate)
+    .sort((a, b) => a.customer_email.localeCompare(b.customer_email));
 
   // Host accounts that are expiring soon (<= 7 days) OR almost full (sisa_slot <= 1)
   const alertHosts = hostAccounts
@@ -297,55 +303,89 @@ export default function DashboardPage() {
         <div className="grid gap-6 md:grid-cols-2">
           {/* Expiring Customers Card */}
           <div className="rounded-xl border border-neutral-200 dark:border-neutral-900 bg-neutral-50/30 dark:bg-neutral-950/40 p-5 flex flex-col">
-            <h2 className="text-sm font-semibold text-neutral-800 dark:text-neutral-300 mb-4 flex items-center justify-between">
-              <span className="flex items-center gap-2">
+            {/* Card Header with date navigator */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <h2 className="text-sm font-semibold text-neutral-800 dark:text-neutral-300 flex items-center gap-2">
                 <ShieldAlert className="h-4 w-4 text-amber-500" />
-                Customer Akan Habis (≤3 hari)
-              </span>
-              <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-bold bg-neutral-100 dark:bg-neutral-900 px-2 py-0.5 rounded border border-neutral-200 dark:border-neutral-800">
-                {expiringCustomers.length} Antrean
-              </span>
-            </h2>
+                Customer Habis Masa Aktif
+              </h2>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => shiftExpiryDate(-1)}
+                  className="h-7 w-7 flex items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                  aria-label="Hari sebelumnya"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <input
+                  type="date"
+                  value={expiryViewDate}
+                  onChange={(e) => { if (e.target.value) setExpiryViewDate(e.target.value); }}
+                  className="h-7 text-xs px-2 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 focus:outline-none focus:border-purple-500/50"
+                />
+                <button
+                  onClick={() => shiftExpiryDate(1)}
+                  disabled={isExpiryViewToday}
+                  className="h-7 w-7 flex items-center justify-center rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  aria-label="Hari berikutnya"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                {!isExpiryViewToday && (
+                  <button
+                    onClick={() => setExpiryViewDate(todayStr)}
+                    className="h-7 px-2 text-[10px] font-semibold rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-500 hover:bg-purple-500/20 transition-colors"
+                  >
+                    Hari Ini
+                  </button>
+                )}
+                <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-bold bg-neutral-100 dark:bg-neutral-900 px-2 py-0.5 rounded border border-neutral-200 dark:border-neutral-800">
+                  {expiringCustomers.length} customer
+                </span>
+              </div>
+            </div>
 
             {expiringCustomers.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
                 <div className="h-10 w-10 rounded-xl bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center mb-3 text-neutral-400 dark:text-neutral-600">
                   <ShieldCheck className="h-5 w-5 text-emerald-500" />
                 </div>
-                <h4 className="font-semibold text-neutral-800 dark:text-neutral-300 text-xs">Semua Aman</h4>
+                <h4 className="font-semibold text-neutral-800 dark:text-neutral-300 text-xs">Tidak Ada yang Habis</h4>
                 <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mt-1 max-w-xs">
-                  Tidak ada customer yang akan habis masa aktifnya dalam 3 hari ke depan.
+                  {isExpiryViewToday
+                    ? 'Tidak ada customer yang habis masa aktifnya hari ini.'
+                    : `Tidak ada customer yang habis pada tanggal ini.`}
                 </p>
               </div>
             ) : (
               <div className="flex-1 space-y-3 max-h-[350px] overflow-y-auto pr-1">
-                {expiringCustomers.map(sub => {
-                  const remDays = getRemainingDays(sub.expiry_date);
-                  return (
-                    <div key={sub.id} className="flex items-center justify-between p-3 rounded-lg bg-neutral-100/50 dark:bg-neutral-950/40 border border-neutral-200 dark:border-neutral-900/60 text-xs">
-                      <div className="overflow-hidden pr-2">
-                        <strong className="block text-neutral-800 dark:text-neutral-200 truncate font-semibold">{sub.customer_email}</strong>
-                        <span className="text-[10px] text-neutral-500 dark:text-neutral-400 truncate block mt-0.5">
-                          Host: {getHostEmail(sub.host_account_id)}
-                        </span>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${remDays === 0
-                            ? 'bg-red-500/10 text-red-400 border border-red-500/20'
-                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                          }`}>
-                          {remDays === 0 ? 'Hari Ini' : `${remDays} hari lagi`}
-                        </span>
-                        <Link
-                          href="/customers"
-                          className="block text-[10px] text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300 font-semibold mt-1.5 transition-colors"
-                        >
-                          Perpanjang &rarr;
-                        </Link>
-                      </div>
+                {expiringCustomers.map(sub => (
+                  <div key={sub.id} className="flex items-center justify-between p-3 rounded-lg bg-neutral-100/50 dark:bg-neutral-950/40 border border-neutral-200 dark:border-neutral-900/60 text-xs">
+                    <div className="overflow-hidden pr-2">
+                      <strong className="block text-neutral-800 dark:text-neutral-200 truncate font-semibold">{sub.customer_email}</strong>
+                      <span className="text-[10px] text-neutral-500 dark:text-neutral-400 truncate block mt-0.5">
+                        Host: {getHostEmail(sub.host_account_id)}
+                      </span>
                     </div>
-                  );
-                })}
+                    <div className="text-right shrink-0">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        isExpiryViewToday
+                          ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                          : expiryViewDate < todayStr
+                            ? 'bg-neutral-500/10 text-neutral-400 border border-neutral-500/20'
+                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                      }`}>
+                        {isExpiryViewToday ? 'Hari Ini' : expiryViewDate < todayStr ? 'Sudah Lewat' : 'Mendatang'}
+                      </span>
+                      <Link
+                        href="/customers"
+                        className="block text-[10px] text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300 font-semibold mt-1.5 transition-colors"
+                      >
+                        Perpanjang &rarr;
+                      </Link>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

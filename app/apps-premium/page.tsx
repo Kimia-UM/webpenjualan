@@ -44,6 +44,8 @@ import {
   Package,
   DollarSign,
   TrendingUp,
+  Wallet,
+  CalendarRange,
 } from 'lucide-react';
 
 export default function AppsPremiumPage() {
@@ -51,6 +53,37 @@ export default function AppsPremiumPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('semua');
+
+  // Stats date range
+  type StatsPreset = 'semua' | 'hari_ini' | '7_hari' | '30_hari' | 'bulan_ini' | 'kustom';
+  const [statsPreset, setStatsPreset] = useState<StatsPreset>('semua');
+  const [statsDateFrom, setStatsDateFrom] = useState('');
+  const [statsDateTo, setStatsDateTo] = useState('');
+
+  const applyPreset = (preset: StatsPreset) => {
+    const today = new Date();
+    const toISO = (d: Date) => d.toISOString().split('T')[0];
+    setStatsPreset(preset);
+    if (preset === 'hari_ini') {
+      setStatsDateFrom(toISO(today));
+      setStatsDateTo(toISO(today));
+    } else if (preset === '7_hari') {
+      const from = new Date(today); from.setDate(today.getDate() - 6);
+      setStatsDateFrom(toISO(from));
+      setStatsDateTo(toISO(today));
+    } else if (preset === '30_hari') {
+      const from = new Date(today); from.setDate(today.getDate() - 29);
+      setStatsDateFrom(toISO(from));
+      setStatsDateTo(toISO(today));
+    } else if (preset === 'bulan_ini') {
+      const from = new Date(today.getFullYear(), today.getMonth(), 1);
+      setStatsDateFrom(toISO(from));
+      setStatsDateTo(toISO(today));
+    } else {
+      setStatsDateFrom('');
+      setStatsDateTo('');
+    }
+  };
 
   // Dialog states
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -84,6 +117,14 @@ export default function AppsPremiumPage() {
 
   const [customVariationValue, setCustomVariationValue] = useState(1);
   const [customVariationUnit, setCustomVariationUnit] = useState<'days' | 'weeks' | 'months' | 'years'>('months');
+
+  // Warranty states (Add form)
+  const [warrantyOption, setWarrantyOption] = useState<'none' | '3' | '7' | '14' | '30' | 'custom'>('none');
+  const [warrantyCustomDays, setWarrantyCustomDays] = useState(7);
+
+  // Warranty states (Edit form)
+  const [editWarrantyOption, setEditWarrantyOption] = useState<'none' | '3' | '7' | '14' | '30' | 'custom'>('none');
+  const [editWarrantyCustomDays, setEditWarrantyCustomDays] = useState(7);
 
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -124,8 +165,48 @@ export default function AppsPremiumPage() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays < 0) return 'habis';
-    if (diffDays <= 3) return 'akan_habis';
+    if (diffDays <= 1) return 'akan_habis';
     return 'aktif';
+  };
+
+  // Helper: Warranty Status
+  // Returns 'aktif' (still in warranty), 'habis' (expired), or null (no warranty)
+  const getWarrantyStatus = (orderDateStr: string, warrantyDays?: number): 'aktif' | 'habis' | null => {
+    if (!warrantyDays || warrantyDays <= 0 || !orderDateStr) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const warrantyEnd = new Date(orderDateStr);
+    warrantyEnd.setDate(warrantyEnd.getDate() + warrantyDays);
+    warrantyEnd.setHours(0, 0, 0, 0);
+    return warrantyEnd.getTime() >= today.getTime() ? 'aktif' : 'habis';
+  };
+
+  // Helper: Warranty expiry date string for preview
+  const getWarrantyExpiryDate = (orderDateStr: string, warrantyDays: number): string => {
+    if (!orderDateStr || warrantyDays <= 0) return '';
+    const d = new Date(orderDateStr);
+    d.setDate(d.getDate() + warrantyDays);
+    return d.toISOString().split('T')[0];
+  };
+
+  // Helper: resolve warranty option to days
+  const resolveWarrantyDays = (option: string, customDays: number): number => {
+    if (option === '3') return 3;
+    if (option === '7') return 7;
+    if (option === '14') return 14;
+    if (option === '30') return 30;
+    if (option === 'custom') return customDays;
+    return 0;
+  };
+
+  // Helper: days → warranty option
+  const daysToWarrantyOption = (days?: number): 'none' | '3' | '7' | '14' | '30' | 'custom' => {
+    if (!days || days === 0) return 'none';
+    if (days === 3) return '3';
+    if (days === 7) return '7';
+    if (days === 14) return '14';
+    if (days === 30) return '30';
+    return 'custom';
   };
 
   // Helper: Format Rupiah
@@ -184,6 +265,8 @@ export default function AppsPremiumPage() {
     setSellingPrice(0);
     setCapitalPrice(0);
     setNotes('');
+    setWarrantyOption('none');
+    setWarrantyCustomDays(7);
     setFormError(null);
     setIsFormOpen(true);
   };
@@ -202,6 +285,9 @@ export default function AppsPremiumPage() {
       capitalPrice: app.capital_price,
       notes: app.notes || '',
     });
+    const opt = daysToWarrantyOption(app.warranty_days);
+    setEditWarrantyOption(opt);
+    setEditWarrantyCustomDays(opt === 'custom' ? (app.warranty_days ?? 7) : 7);
     setFormError(null);
     setIsEditOpen(true);
   };
@@ -223,6 +309,8 @@ export default function AppsPremiumPage() {
       ? `${customVariationValue} ${customVariationUnit === 'days' ? 'Hari' : customVariationUnit === 'weeks' ? 'Minggu' : customVariationUnit === 'months' ? 'Bulan' : 'Tahun'}`
       : variation;
 
+    const warrantyDays = resolveWarrantyDays(warrantyOption, warrantyCustomDays);
+
     try {
       const appsRef = ref(db, 'apps_premium');
       const newAppRef = push(appsRef);
@@ -237,6 +325,7 @@ export default function AppsPremiumPage() {
         capital_price: Number(capitalPrice),
         profit: profit,
         notes: notes.trim(),
+        warranty_days: warrantyDays,
         created_at: Date.now()
       });
       setIsFormOpen(false);
@@ -266,6 +355,7 @@ export default function AppsPremiumPage() {
     }
 
     const profit = Number(editForm.sellingPrice) - Number(editForm.capitalPrice);
+    const editWarrantyDays = resolveWarrantyDays(editWarrantyOption, editWarrantyCustomDays);
 
     try {
       await update(ref(db, `apps_premium/${currentApp.id}`), {
@@ -278,7 +368,8 @@ export default function AppsPremiumPage() {
         selling_price: Number(editForm.sellingPrice),
         capital_price: Number(editForm.capitalPrice),
         profit: profit,
-        notes: editForm.notes.trim()
+        notes: editForm.notes.trim(),
+        warranty_days: editWarrantyDays,
       });
       setIsEditOpen(false);
     } catch (err: any) {
@@ -317,10 +408,29 @@ export default function AppsPremiumPage() {
     return status === statusFilter;
   });
 
+  // Stats date-filtered data
+  const statsFilteredApps = appsData.filter(app => {
+    if (statsPreset === 'semua' || (!statsDateFrom && !statsDateTo)) return true;
+    const order = app.order_date;
+    if (statsDateFrom && order < statsDateFrom) return false;
+    if (statsDateTo && order > statsDateTo) return false;
+    return true;
+  });
+
   // Stats
-  const totalTransaksi = appsData.length;
-  const totalPendapatan = appsData.reduce((acc, curr) => acc + curr.selling_price, 0);
-  const totalKeuntungan = appsData.reduce((acc, curr) => acc + curr.profit, 0);
+  const totalTransaksi = statsFilteredApps.length;
+  const totalPendapatan = statsFilteredApps.reduce((acc, curr) => acc + curr.selling_price, 0);
+  const totalModal = statsFilteredApps.reduce((acc, curr) => acc + curr.capital_price, 0);
+  const totalKeuntungan = statsFilteredApps.reduce((acc, curr) => acc + curr.profit, 0);
+
+  const PRESETS: { key: StatsPreset; label: string }[] = [
+    { key: 'semua', label: 'Semua' },
+    { key: 'hari_ini', label: 'Hari Ini' },
+    { key: '7_hari', label: '7 Hari' },
+    { key: '30_hari', label: '30 Hari' },
+    { key: 'bulan_ini', label: 'Bulan Ini' },
+    { key: 'kustom', label: 'Kustom' },
+  ];
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 py-8 px-4 sm:px-6 lg:px-8">
@@ -345,27 +455,84 @@ export default function AppsPremiumPage() {
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white dark:bg-neutral-950/40 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
-            <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-2">
-              <Package className="h-4 w-4" />
-              <h3 className="text-xs font-semibold">Total Transaksi</h3>
+        <div className="mb-8">
+          {/* Range Controls */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <div className="flex items-center gap-1.5 text-neutral-500 dark:text-neutral-400 mr-1">
+              <CalendarRange className="h-3.5 w-3.5" />
+              <span className="text-xs font-semibold">Rentang:</span>
             </div>
-            <p className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{totalTransaksi}</p>
+            {PRESETS.map(p => (
+              <button
+                key={p.key}
+                onClick={() => applyPreset(p.key)}
+                className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                  statsPreset === p.key
+                    ? 'bg-orange-500 border-orange-500 text-white'
+                    : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:border-orange-400 hover:text-orange-500'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+            {/* Custom date inputs — only shown when preset = kustom */}
+            {statsPreset === 'kustom' && (
+              <div className="flex items-center gap-2 ml-1">
+                <Input
+                  type="date"
+                  value={statsDateFrom}
+                  onChange={(e) => setStatsDateFrom(e.target.value)}
+                  className="h-7 text-xs px-2 w-36 bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800"
+                />
+                <span className="text-xs text-neutral-400">–</span>
+                <Input
+                  type="date"
+                  value={statsDateTo}
+                  onChange={(e) => setStatsDateTo(e.target.value)}
+                  className="h-7 text-xs px-2 w-36 bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800"
+                />
+              </div>
+            )}
+            {/* Label range aktif */}
+            {statsPreset !== 'semua' && statsDateFrom && (
+              <span className="text-[10px] text-neutral-400 dark:text-neutral-500 ml-auto">
+                {statsDateFrom === statsDateTo
+                  ? formatIndonesianDate(statsDateFrom)
+                  : `${formatIndonesianDate(statsDateFrom)} – ${formatIndonesianDate(statsDateTo)}`}
+              </span>
+            )}
           </div>
-          <div className="bg-white dark:bg-neutral-950/40 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
-            <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-2">
-              <DollarSign className="h-4 w-4 text-orange-500" />
-              <h3 className="text-xs font-semibold">Total Pendapatan</h3>
+
+          {/* Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white dark:bg-neutral-950/40 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-2">
+                <Package className="h-4 w-4" />
+                <h3 className="text-xs font-semibold">Total Transaksi</h3>
+              </div>
+              <p className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{totalTransaksi}</p>
             </div>
-            <p className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{formatRupiah(totalPendapatan)}</p>
-          </div>
-          <div className="bg-white dark:bg-neutral-950/40 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
-            <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-2">
-              <TrendingUp className="h-4 w-4 text-emerald-500" />
-              <h3 className="text-xs font-semibold">Total Keuntungan</h3>
+            <div className="bg-white dark:bg-neutral-950/40 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-2">
+                <DollarSign className="h-4 w-4 text-orange-500" />
+                <h3 className="text-xs font-semibold">Total Pendapatan</h3>
+              </div>
+              <p className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{formatRupiah(totalPendapatan)}</p>
             </div>
-            <p className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{formatRupiah(totalKeuntungan)}</p>
+            <div className="bg-white dark:bg-neutral-950/40 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-2">
+                <Wallet className="h-4 w-4 text-violet-500" />
+                <h3 className="text-xs font-semibold">Total Modal</h3>
+              </div>
+              <p className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{formatRupiah(totalModal)}</p>
+            </div>
+            <div className="bg-white dark:bg-neutral-950/40 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
+              <div className="flex items-center gap-3 text-neutral-500 dark:text-neutral-400 mb-2">
+                <TrendingUp className="h-4 w-4 text-emerald-500" />
+                <h3 className="text-xs font-semibold">Total Keuntungan</h3>
+              </div>
+              <p className="text-2xl font-bold text-neutral-800 dark:text-neutral-100">{formatRupiah(totalKeuntungan)}</p>
+            </div>
           </div>
         </div>
 
@@ -434,6 +601,7 @@ export default function AppsPremiumPage() {
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Tgl Habis</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Keuntungan</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Status</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Garansi</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-right py-4 pr-6">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -475,6 +643,25 @@ export default function AppsPremiumPage() {
                               {currentStatus === 'habis' && 'Habis'}
                             </span>
                           </span>
+                        </TableCell>
+                        <TableCell>
+                          {(() => {
+                            const ws = getWarrantyStatus(app.order_date, app.warranty_days);
+                            if (ws === null) return <span className="text-neutral-400 dark:text-neutral-600 text-xs">—</span>;
+                            return (
+                              <div className="flex flex-col gap-0.5">
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
+                                  ws === 'aktif'
+                                    ? 'bg-sky-500/5 text-sky-400 border-sky-500/20'
+                                    : 'bg-neutral-500/5 text-neutral-400 border-neutral-500/20'
+                                }`}>
+                                  {ws === 'aktif' ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                                  {ws === 'aktif' ? 'Dalam Garansi' : 'Garansi Habis'}
+                                </span>
+                                <span className="text-[10px] text-neutral-400 pl-0.5">{app.warranty_days} hari</span>
+                              </div>
+                            );
+                          })()}
                         </TableCell>
                         <TableCell className="text-right py-3 pr-6">
                           <div className="flex items-center justify-end gap-2">
@@ -547,6 +734,25 @@ export default function AppsPremiumPage() {
                         <span className="text-neutral-500 dark:text-neutral-400 text-[10px]">{formatRupiah(app.capital_price)}</span>
                       </div>
                     </div>
+
+                    {/* Warranty row — only show if warranty_days is set */}
+                    {(() => {
+                      const ws = getWarrantyStatus(app.order_date, app.warranty_days);
+                      if (ws === null) return null;
+                      return (
+                        <div className="flex items-center justify-between pt-1 pb-0.5 text-xs">
+                          <span className="text-neutral-500 dark:text-neutral-400">Garansi ({app.warranty_days} hari)</span>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
+                            ws === 'aktif'
+                              ? 'bg-sky-500/5 text-sky-400 border-sky-500/20'
+                              : 'bg-neutral-500/5 text-neutral-400 border-neutral-500/20'
+                          }`}>
+                            {ws === 'aktif' ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                            {ws === 'aktif' ? 'Dalam Garansi' : 'Garansi Habis'}
+                          </span>
+                        </div>
+                      );
+                    })()}
 
                     <div className="flex items-center justify-between text-xs pt-1">
                       <div className="flex flex-col gap-1 text-neutral-600 dark:text-neutral-400 text-[10px]">
@@ -652,6 +858,39 @@ export default function AppsPremiumPage() {
                   <SelectItem value="Kustom...">Kustom...</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Warranty field — Add form */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Garansi (Opsional)</Label>
+              <Select value={warrantyOption} onValueChange={(val) => { if (val) setWarrantyOption(val as any); }}>
+                <SelectTrigger className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
+                  <SelectValue placeholder="Pilih Garansi" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
+                  <SelectItem value="none">Tidak Ada Garansi</SelectItem>
+                  <SelectItem value="3">3 Hari</SelectItem>
+                  <SelectItem value="7">7 Hari</SelectItem>
+                  <SelectItem value="14">14 Hari</SelectItem>
+                  <SelectItem value="30">30 Hari</SelectItem>
+                  <SelectItem value="custom">Kustom...</SelectItem>
+                </SelectContent>
+              </Select>
+              {warrantyOption === 'custom' && (
+                <Input
+                  type="number"
+                  min={1}
+                  value={warrantyCustomDays}
+                  onChange={(e) => setWarrantyCustomDays(Number(e.target.value))}
+                  placeholder="Jumlah hari garansi"
+                  className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-sm"
+                />
+              )}
+              {warrantyOption !== 'none' && orderDate && (
+                <p className="text-[10px] text-sky-500 dark:text-sky-400 pl-0.5">
+                  Garansi berakhir: {formatIndonesianDate(getWarrantyExpiryDate(orderDate, resolveWarrantyDays(warrantyOption, warrantyCustomDays)))}
+                </p>
+              )}
             </div>
 
             {variation === 'Kustom...' && (
@@ -829,6 +1068,39 @@ export default function AppsPremiumPage() {
                 required
                 className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800"
               />
+            </div>
+
+            {/* Warranty field — Edit form */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Garansi (Opsional)</Label>
+              <Select value={editWarrantyOption} onValueChange={(val) => { if (val) setEditWarrantyOption(val as any); }}>
+                <SelectTrigger className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
+                  <SelectValue placeholder="Pilih Garansi" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800">
+                  <SelectItem value="none">Tidak Ada Garansi</SelectItem>
+                  <SelectItem value="3">3 Hari</SelectItem>
+                  <SelectItem value="7">7 Hari</SelectItem>
+                  <SelectItem value="14">14 Hari</SelectItem>
+                  <SelectItem value="30">30 Hari</SelectItem>
+                  <SelectItem value="custom">Kustom...</SelectItem>
+                </SelectContent>
+              </Select>
+              {editWarrantyOption === 'custom' && (
+                <Input
+                  type="number"
+                  min={1}
+                  value={editWarrantyCustomDays}
+                  onChange={(e) => setEditWarrantyCustomDays(Number(e.target.value))}
+                  placeholder="Jumlah hari garansi"
+                  className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-sm"
+                />
+              )}
+              {editWarrantyOption !== 'none' && editForm.orderDate && (
+                <p className="text-[10px] text-sky-500 dark:text-sky-400 pl-0.5">
+                  Garansi berakhir: {formatIndonesianDate(getWarrantyExpiryDate(editForm.orderDate, resolveWarrantyDays(editWarrantyOption, editWarrantyCustomDays)))}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">

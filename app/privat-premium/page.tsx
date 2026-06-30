@@ -34,6 +34,7 @@ import {
   Briefcase,
   DollarSign,
   TrendingUp,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function PrivatPremiumPage() {
@@ -53,6 +54,8 @@ export default function PrivatPremiumPage() {
   const [sellingPrice, setSellingPrice] = useState<number>(0);
   const [capitalPrice, setCapitalPrice] = useState<number>(0);
   const [notes, setNotes] = useState('');
+  const [warrantyActive, setWarrantyActive] = useState(false);
+  const [warrantyDeduction, setWarrantyDeduction] = useState<number>(5000);
 
   // Form Edit states
   const [editForm, setEditForm] = useState({
@@ -61,6 +64,8 @@ export default function PrivatPremiumPage() {
     sellingPrice: 0,
     capitalPrice: 0,
     notes: '',
+    warrantyActive: false,
+    warrantyDeduction: 5000,
   });
 
   const [formError, setFormError] = useState<string | null>(null);
@@ -116,6 +121,29 @@ export default function PrivatPremiumPage() {
     }
   };
 
+  // Helper: Calculate Warranty Refund
+  const calculateWarrantyRefund = (orderDateStr: string, sellingPrice: number, deductionPerMonth: number = 0, isWarrantyActive: boolean = false) => {
+    if (!isWarrantyActive || !orderDateStr) return null;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const orderDate = new Date(orderDateStr);
+    orderDate.setHours(0, 0, 0, 0);
+    
+    const diffTime = today.getTime() - orderDate.getTime();
+    const diffDays = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    
+    if (diffDays <= 10) {
+      return sellingPrice; // 100% refund in first 10 days
+    }
+    
+    const monthsUsed = Math.ceil((diffDays - 10) / 30);
+    const deduction = monthsUsed * deductionPerMonth;
+    const refund = Math.max(0, sellingPrice - deduction);
+    
+    return refund;
+  };
+
   // Handle Add Open
   const handleAddOpen = () => {
     setCustomerName('');
@@ -123,6 +151,8 @@ export default function PrivatPremiumPage() {
     setSellingPrice(0);
     setCapitalPrice(0);
     setNotes('');
+    setWarrantyActive(false);
+    setWarrantyDeduction(5000);
     setFormError(null);
     setIsFormOpen(true);
   };
@@ -136,6 +166,8 @@ export default function PrivatPremiumPage() {
       sellingPrice: data.selling_price,
       capitalPrice: data.capital_price,
       notes: data.notes || '',
+      warrantyActive: data.warranty_active || false,
+      warrantyDeduction: data.warranty_deduction || 5000,
     });
     setFormError(null);
     setIsEditOpen(true);
@@ -165,6 +197,8 @@ export default function PrivatPremiumPage() {
         capital_price: Number(capitalPrice),
         profit: profit,
         notes: notes.trim(),
+        warranty_active: warrantyActive,
+        warranty_deduction: warrantyActive ? Number(warrantyDeduction) : null,
         created_at: Date.now()
       });
       setIsFormOpen(false);
@@ -202,7 +236,9 @@ export default function PrivatPremiumPage() {
         selling_price: Number(editForm.sellingPrice),
         capital_price: Number(editForm.capitalPrice),
         profit: profit,
-        notes: editForm.notes.trim()
+        notes: editForm.notes.trim(),
+        warranty_active: editForm.warrantyActive,
+        warranty_deduction: editForm.warrantyActive ? Number(editForm.warrantyDeduction) : null,
       });
       setIsEditOpen(false);
     } catch (err: any) {
@@ -336,6 +372,7 @@ export default function PrivatPremiumPage() {
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Harga Jual</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Modal</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Keuntungan</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Garansi</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold max-w-[200px]">Catatan</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-right py-4 pr-6">Aksi</TableHead>
                   </TableRow>
@@ -353,6 +390,21 @@ export default function PrivatPremiumPage() {
                       <TableCell className="text-neutral-800 dark:text-neutral-300 font-medium">{formatRupiah(data.selling_price)}</TableCell>
                       <TableCell className="text-neutral-600 dark:text-neutral-400">{formatRupiah(data.capital_price)}</TableCell>
                       <TableCell className="text-emerald-600 dark:text-emerald-400 font-bold">{formatRupiah(data.profit)}</TableCell>
+                      <TableCell>
+                        {data.warranty_active ? (
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1">
+                              <ShieldCheck className="h-3 w-3" />
+                              Aktif
+                            </span>
+                            <span className="text-xs text-neutral-600 dark:text-neutral-300 font-semibold">
+                              {formatRupiah(calculateWarrantyRefund(data.order_date, data.selling_price, data.warranty_deduction, data.warranty_active) || 0)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-neutral-400">-</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-neutral-500 dark:text-neutral-400 text-xs max-w-[200px] truncate" title={data.notes}>
                         {data.notes || '-'}
                       </TableCell>
@@ -408,6 +460,18 @@ export default function PrivatPremiumPage() {
                       <span className="text-neutral-500 dark:text-neutral-400 text-[10px]">{formatRupiah(data.capital_price)}</span>
                     </div>
                   </div>
+
+                  {data.warranty_active && (
+                    <div className="flex items-center justify-between px-3 py-2 bg-teal-50/50 dark:bg-teal-950/20 border border-teal-100 dark:border-teal-900/30 rounded-lg">
+                      <span className="text-xs font-semibold text-teal-700 dark:text-teal-400 flex items-center gap-1.5">
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        Nilai Refund Saat Ini:
+                      </span>
+                      <span className="text-xs font-bold text-teal-700 dark:text-teal-300">
+                        {formatRupiah(calculateWarrantyRefund(data.order_date, data.selling_price, data.warranty_deduction, data.warranty_active) || 0)}
+                      </span>
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-end text-xs pt-1">
                     <div className="flex gap-2">
@@ -517,6 +581,45 @@ export default function PrivatPremiumPage() {
               />
             </div>
 
+            <div className="border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 bg-neutral-50/50 dark:bg-neutral-950/20">
+              <div className="flex flex-row items-start space-x-3 space-y-0">
+                <input
+                  type="checkbox"
+                  id="add-warranty"
+                  checked={warrantyActive}
+                  onChange={(e) => setWarrantyActive(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-neutral-300 text-teal-600 focus:ring-teal-600"
+                />
+                <div className="space-y-1 leading-none">
+                  <Label htmlFor="add-warranty" className="text-xs font-semibold cursor-pointer">
+                    Aktifkan Sistem Garansi
+                  </Label>
+                  <p className="text-[10px] text-muted-foreground">
+                    10 hari pertama refund 100%. Hari ke-11 ke atas akan dipotong per bulan.
+                  </p>
+                </div>
+              </div>
+
+              {warrantyActive && (
+                <div className="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-800">
+                  <Label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                    Potongan Garansi (per Bulan)
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={warrantyDeduction}
+                    onChange={(e) => setWarrantyDeduction(Number(e.target.value))}
+                    required={warrantyActive}
+                    className="mt-1 bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800"
+                  />
+                  <p className="text-[10px] text-neutral-500 mt-1">
+                    Misal: Rp5000. Jika klaim dilakukan setelah lewat 10 hari (masuk bulan ke-1), dana yang di-refund = Harga Jual - Rp5000.
+                  </p>
+                </div>
+              )}
+            </div>
+
             <DialogFooter className="pt-4 gap-2">
               <Button
                 type="button"
@@ -617,6 +720,45 @@ export default function PrivatPremiumPage() {
                 className="flex w-full rounded-md bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-700 p-3 text-xs focus:outline-none focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20 min-h-[80px]"
                 placeholder="Tulis catatan di sini..."
               />
+            </div>
+
+            <div className="border border-neutral-200 dark:border-neutral-800 rounded-xl p-3 bg-neutral-50/50 dark:bg-neutral-950/20">
+              <div className="flex flex-row items-start space-x-3 space-y-0">
+                <input
+                  type="checkbox"
+                  id="edit-warranty"
+                  checked={editForm.warrantyActive}
+                  onChange={(e) => setEditForm({ ...editForm, warrantyActive: e.target.checked })}
+                  className="mt-1 h-4 w-4 rounded border-neutral-300 text-teal-600 focus:ring-teal-600"
+                />
+                <div className="space-y-1 leading-none">
+                  <Label htmlFor="edit-warranty" className="text-xs font-semibold cursor-pointer">
+                    Aktifkan Sistem Garansi
+                  </Label>
+                  <p className="text-[10px] text-muted-foreground">
+                    10 hari pertama refund 100%. Hari ke-11 ke atas akan dipotong per bulan.
+                  </p>
+                </div>
+              </div>
+
+              {editForm.warrantyActive && (
+                <div className="mt-4 pt-3 border-t border-neutral-200 dark:border-neutral-800">
+                  <Label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
+                    Potongan Garansi (per Bulan)
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={editForm.warrantyDeduction}
+                    onChange={(e) => setEditForm({ ...editForm, warrantyDeduction: Number(e.target.value) })}
+                    required={editForm.warrantyActive}
+                    className="mt-1 bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800"
+                  />
+                  <p className="text-[10px] text-neutral-500 mt-1">
+                    Misal: Rp5000. Jika klaim dilakukan setelah lewat 10 hari (masuk bulan ke-1), dana yang di-refund = Harga Jual - Rp5000.
+                  </p>
+                </div>
+              )}
             </div>
 
             <DialogFooter className="pt-4 gap-2">

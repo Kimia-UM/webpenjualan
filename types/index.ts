@@ -48,6 +48,7 @@ export interface AppsPremium {
   capital_price: number;
   profit: number;
   notes?: string;
+  warranty_days?: number; // 0 or undefined = no warranty; positive int = days from order_date
   created_at: number;
 }
 
@@ -59,6 +60,8 @@ export interface PrivatPremium {
   capital_price: number;
   profit: number;
   notes?: string;
+  warranty_active?: boolean;
+  warranty_deduction?: number;
   created_at: number;
 }
 

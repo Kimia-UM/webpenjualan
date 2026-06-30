@@ -68,7 +68,7 @@ export async function GET(request: Request) {
       const diffTime = expiry.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      return diffDays >= 0 && diffDays <= 3;
+      return diffDays >= 0 && diffDays <= 1;
     }).map((sub: any) => {
       const expiry = new Date(sub.expiry_date);
       expiry.setHours(0, 0, 0, 0);
@@ -107,25 +107,29 @@ export async function GET(request: Request) {
     let message = '';
     
     if (expiringSubs.length === 0 && expiringHosts.length === 0) {
-      message = '🔔 *Reminder Harian*\n\nSemua aman! Tidak ada customer atau akun induk yang akan habis dalam waktu dekat.';
+      message = '🌟 *Reminder Harian PremiumShare*\n\n✅ _Semua aman! Tidak ada customer atau akun induk yang akan habis dalam waktu dekat._ 🎉';
     } else {
-      message = '🔔 *Reminder Harian PremiumShare*\n';
+      message = '🔔 *Reminder Harian PremiumShare*\n\n';
       
       if (expiringSubs.length > 0) {
-        message += `\n*${expiringSubs.length} Customer akan habis (≤3 hari):*\n`;
+        message += `🚨 *${expiringSubs.length} Customer Akan Habis (≤1 hari):*\n`;
         expiringSubs.forEach(sub => {
-          const dayLabel = sub.daysLeft === 0 ? 'Hari Ini' : `${sub.daysLeft} hari lagi`;
-          message += `- \`${sub.email}\` (Host: \`${sub.hostEmail}\`) - *${dayLabel}*\n`;
+          const isToday = sub.daysLeft === 0;
+          const dayLabel = isToday ? '🔴 HARI INI' : `⏳ ${sub.daysLeft} Hari Lagi`;
+          message += `👤 \`${sub.email}\`\n      ├ ${dayLabel}\n      └ 🏠 Host: \`${sub.hostEmail}\`\n\n`;
         });
       }
       
       if (expiringHosts.length > 0) {
-        message += `\n*⚠️ Peringatan Stok Akun Induk (≤7 hari):*\n`;
+        message += `⚠️ *Stok Akun Induk Menipis (≤7 hari):*\n`;
         expiringHosts.forEach(host => {
-          const dayLabel = host.daysLeft === 0 ? 'Hari Ini' : `${host.daysLeft} hari lagi`;
-          message += `- \`${host.email}\` - *${dayLabel}*\n`;
+          const isToday = host.daysLeft === 0;
+          const dayLabel = isToday ? '🔴 HARI INI' : `⏳ ${host.daysLeft} Hari Lagi`;
+          message += `🟢 \`${host.email}\`\n      └ ${dayLabel}\n\n`;
         });
       }
+      
+      message += `💡 _Jangan lupa untuk perbarui data lewat bot ini ya!_`;
     }
 
     // 6. Send to Telegram via Fetch API

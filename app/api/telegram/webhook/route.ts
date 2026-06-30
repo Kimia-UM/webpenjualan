@@ -109,7 +109,7 @@ const getSubscriptionStatus = (expiryDateStr: string) => {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffDays < 0) return "habis";
-  if (diffDays <= 3) return "akan_habis";
+  if (diffDays <= 1) return "akan_habis";
   return "aktif";
 };
 
@@ -140,24 +140,7 @@ export async function POST(request: Request) {
 
     const chatId = message.chat.id;
 
-    // 1. Security Check: Only allow requests from the admin chat ID
-    if (String(chatId) !== String(adminChatId)) {
-      console.warn(`Unauthorized access attempt from Chat ID: ${chatId}`);
-      // Send unauthorized message to the stranger
-      if (botToken) {
-        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: "⚠️ *Akses Ditolak:* Anda bukan admin dari bot ini.",
-            parse_mode: "Markdown",
-          }),
-        });
-      }
-      return NextResponse.json({ ok: true });
-    }
-
+    // (Security Check removed to allow any user to use the bot)
     // Check if Firebase database is ready
     if (!adminDb) {
       return NextResponse.json(
@@ -200,15 +183,15 @@ export async function POST(request: Request) {
 
     // 5. Handle standard slash commands
     if (text === "/start" || text === "/help") {
-      const helpMsg =
-        `👋 *Halo Admin PremiumShare!*\n\n` +
-        `Berikut adalah perintah interaktif yang tersedia:\n` +
-        `- /stok : Cek akun induk yang masih memiliki sisa slot kosong.\n` +
-        `- /infocustomer : Cek daftar customer dengan masa habis terdekat.\n` +
-        `- /updatecustomer : Ubah data customer secara interaktif.\n` +
-        `- /updatehost : Ubah data akun induk (host) secara interaktif.\n` +
-        `- /cancel : Batalkan pengeditan data yang sedang aktif.\n\n` +
-        `💡 *Upload CSV:* Kirimkan file CSV manajemen data untuk melakukan sinkronisasi database secara massal.`;
+        `✨ *PremiumShare Bot Assistant* ✨\n\n` +
+        `Halo Admin! 👋 Saya siap membantu Anda mengelola data.\n\n` +
+        `📋 *Daftar Perintah:*\n` +
+        `🔹 /stok — Cek sisa slot akun induk\n` +
+        `🔹 /infocustomer — Cek customer masa habis terdekat\n` +
+        `🔹 /updatecustomer — Ubah data customer spesifik\n` +
+        `🔹 /updatehost — Ubah data akun induk spesifik\n` +
+        `🔹 /cancel — Batalkan proses yang berjalan\n\n` +
+        `💡 *Tips:* Kirimkan file CSV manajemen data untuk sinkronisasi massal 🚀`;
 
       await sendTelegramReply(botToken, chatId, helpMsg);
     } else if (text === "/updatecustomer") {
@@ -219,7 +202,7 @@ export async function POST(request: Request) {
       await sendTelegramReply(
         botToken, 
         chatId, 
-        "✏️ *Update Customer*\n\nSilakan masukkan *email customer* yang ingin diperbarui datanya:\n(Ketik `/cancel` untuk membatalkan)",
+        "✨ *Update Data Customer*\n\nSilakan ketik *Email Customer* yang ingin diperbarui datanya 👇\n\n_(Ketik /cancel jika ingin membatalkan)_",
         { remove_keyboard: true }
       );
     } else if (text === "/updatehost") {
@@ -230,7 +213,7 @@ export async function POST(request: Request) {
       await sendTelegramReply(
         botToken, 
         chatId, 
-        "✏️ *Update Akun Induk*\n\nSilakan masukkan *email akun induk (host)* yang ingin diperbarui datanya:\n(Ketik `/cancel` untuk membatalkan)",
+        "✨ *Update Akun Induk (Host)*\n\nSilakan ketik *Email Akun Induk* yang ingin diperbarui datanya 👇\n\n_(Ketik /cancel jika ingin membatalkan)_",
         { remove_keyboard: true }
       );
     } else if (text === "/stok") {
@@ -273,11 +256,12 @@ export async function POST(request: Request) {
       // Build reply
       let reply = "📦 *Stok Akun Induk Tersedia:*\n\n";
       if (availableHosts.length === 0) {
-        reply += "❌ Semua akun stok penuh atau tidak ada akun aktif.";
+        reply += "❌ _Semua akun stok penuh atau tidak ada akun aktif._";
       } else {
         availableHosts.forEach((h) => {
-          reply += `- \`${h.email}\` (${h.sisa}/${h.total} slot sisa, ${h.billing})\n`;
+          reply += `🟢 \`${h.email}\`\n      └ 🎟️ *Sisa:* ${h.sisa}/${h.total} slot  |  ⏱️ *Tipe:* ${h.billing}\n\n`;
         });
+        reply += `💡 _Ketik /updatehost untuk menambah stok/perpanjang._`;
       }
 
       await sendTelegramReply(botToken, chatId, reply);
@@ -319,16 +303,17 @@ export async function POST(request: Request) {
         .filter((sub: any) => sub.status !== "habis" && sub.daysLeft <= 5)
         .sort((a, b) => a.daysLeft - b.daysLeft);
 
-      let reply = "📅 *Infocustomer (Sisa ≤ 5 Hari Lagi):*\n\n";
+      let reply = "📅 *Info Customer (Sisa ≤ 5 Hari Lagi):*\n\n";
       if (activeSubs.length === 0) {
         reply +=
-          "❌ Tidak ada customer dengan sisa masa aktif kurang dari 5 hari.";
+          "✅ _Aman! Tidak ada customer dengan sisa masa aktif kurang dari 5 hari._ 🎉";
       } else {
         activeSubs.forEach((sub) => {
-          const dayLabel =
-            sub.daysLeft === 0 ? "Hari Ini" : `${sub.daysLeft} hari lagi`;
-          reply += `- \`${sub.email}\` - *${dayLabel}*\n  (Host: \`${sub.hostEmail}\`)\n`;
+          const isToday = sub.daysLeft === 0;
+          const dayLabel = isToday ? "🚨 *HARI INI*" : `⏳ *${sub.daysLeft} Hari Lagi*`;
+          reply += `👤 \`${sub.email}\`\n      ├ ${dayLabel}\n      └ 🏠 Host: \`${sub.hostEmail}\`\n\n`;
         });
+        reply += `💡 _Segera ingatkan mereka dan perbarui lewat /updatecustomer_`;
       }
 
       await sendTelegramReply(botToken, chatId, reply);

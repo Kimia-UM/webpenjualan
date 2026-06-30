@@ -38,7 +38,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       if (!user && pathname !== '/login') {
         router.replace('/login');
       } else if (user && pathname === '/login') {
-        router.replace('/');
+        router.replace('/dashboard');
       }
     }
   }, [user, loading, pathname, router]);
