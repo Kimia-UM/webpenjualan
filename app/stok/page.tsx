@@ -42,7 +42,9 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  Users
+  Users,
+  ExternalLink,
+  Zap
 } from 'lucide-react';
 
 export default function StokPage() {
@@ -50,6 +52,7 @@ export default function StokPage() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterBillingType, setFilterBillingType] = useState<string>('semua');
 
   // Dialog states
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -62,6 +65,8 @@ export default function StokPage() {
   const [totalSlot, setTotalSlot] = useState(5);
   const [activeUntil, setActiveUntil] = useState('');
   const [status, setStatus] = useState<HostStatus>('proses');
+  const [flowPoints, setFlowPoints] = useState<string>('');
+  const [flowPointsUrl, setFlowPointsUrl] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -133,6 +138,8 @@ export default function StokPage() {
     setTotalSlot(5);
     setActiveUntil('');
     setStatus('proses');
+    setFlowPoints('');
+    setFlowPointsUrl('');
     setFormError(null);
     setIsFormOpen(true);
   };
@@ -145,6 +152,8 @@ export default function StokPage() {
     setTotalSlot(host.total_slot);
     setActiveUntil(host.active_until);
     setStatus(host.status);
+    setFlowPoints(host.flow_points !== undefined ? String(host.flow_points) : '');
+    setFlowPointsUrl(host.flow_points_url || '');
     setFormError(null);
     setIsFormOpen(true);
   };
@@ -168,16 +177,22 @@ export default function StokPage() {
     }
 
     try {
+      const flowPointsParsed = flowPoints.trim() !== '' ? Number(flowPoints) : null;
+      const flowPointsUrlValue = flowPointsUrl.trim() !== '' ? flowPointsUrl.trim() : null;
+
       if (currentHost?.id) {
         // Edit mode
         const hostRef = ref(db, `host_accounts/${currentHost.id}`);
-        await update(hostRef, {
+        const updateData: Record<string, unknown> = {
           account_email: email.trim().toLowerCase(),
           billing_type: billingType,
           total_slot: Number(totalSlot),
           active_until: activeUntil,
-          status: status
-        });
+          status: status,
+          flow_points: flowPointsParsed,
+          flow_points_url: flowPointsUrlValue,
+        };
+        await update(hostRef, updateData);
       } else {
         // Add mode
         const hostRef = ref(db, 'host_accounts');
@@ -188,7 +203,9 @@ export default function StokPage() {
           total_slot: Number(totalSlot),
           active_until: activeUntil,
           status: status,
-          created_at: Date.now()
+          created_at: Date.now(),
+          flow_points: flowPointsParsed,
+          flow_points_url: flowPointsUrlValue,
         });
       }
       setIsFormOpen(false);
@@ -245,12 +262,13 @@ export default function StokPage() {
     }
   };
 
-  // Filter host accounts based on search query
-  const filteredHosts = hostAccounts.filter(host => 
-    host.account_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    host.billing_type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    host.status.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter host accounts based on search query and billing type
+  const filteredHosts = hostAccounts.filter(host => {
+    const matchesSearch = host.account_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          host.status.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesBilling = filterBillingType === 'semua' || host.billing_type === filterBillingType;
+    return matchesSearch && matchesBilling;
+  });
 
   return (
     <div className="min-h-screen bg-background text-foreground py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
@@ -306,18 +324,36 @@ export default function StokPage() {
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative mb-6 max-w-md">
-          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-neutral-500">
-            <Search className="h-4 w-4" />
+        {/* Search and Filter */}
+        <div className="mb-6 space-y-4">
+          <div className="relative max-w-md">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-neutral-500">
+              <Search className="h-4 w-4" />
+            </div>
+            <Input
+              type="text"
+              placeholder="Cari email akun induk..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-white dark:bg-neutral-900/40 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200 focus:border-purple-500/50 focus:ring-purple-500/20"
+            />
           </div>
-          <Input
-            type="text"
-            placeholder="Cari email akun induk..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white dark:bg-neutral-900/40 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200 focus:border-purple-500/50 focus:ring-purple-500/20"
-          />
+
+          <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+            {['semua', 'harian', 'mingguan', 'bulanan'].map((type) => (
+              <button
+                key={type}
+                onClick={() => setFilterBillingType(type)}
+                className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  filterBillingType === type
+                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+                    : 'bg-white dark:bg-neutral-900/40 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                }`}
+              >
+                {type === 'semua' ? 'Semua Tipe' : type.charAt(0).toUpperCase() + type.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Content Table / Grid */}
@@ -349,6 +385,7 @@ export default function StokPage() {
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Tipe Billing</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-center">Total Slot</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-center">Sisa Slot</TableHead>
+                    <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-center">Poin Flow</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Masa Aktif</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold">Status</TableHead>
                     <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-right py-4 pr-6">Aksi</TableHead>
@@ -373,6 +410,22 @@ export default function StokPage() {
                             {sisaSlotValue} Slot
                           </span>
                         </TableCell>
+                        <TableCell className="text-center">
+                          {host.flow_points !== undefined && host.flow_points !== null ? (
+                            <span className={`inline-flex items-center gap-1 font-semibold px-2.5 py-1 rounded-full text-xs border ${
+                              host.flow_points >= 100
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                : host.flow_points > 0
+                                  ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                  : 'bg-red-500/10 text-red-400 border-red-500/20'
+                            }`}>
+                              <Zap className="h-3 w-3" />
+                              {host.flow_points.toLocaleString('id-ID')}
+                            </span>
+                          ) : (
+                            <span className="text-neutral-400 dark:text-neutral-600 text-xs">—</span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-neutral-700 dark:text-neutral-300">
                           <div className="flex items-center gap-2 text-xs">
                             <Calendar className="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-500" />
@@ -395,6 +448,17 @@ export default function StokPage() {
                         </TableCell>
                         <TableCell className="text-right py-4.5 pr-6">
                           <div className="flex items-center justify-end gap-2">
+                            {host.flow_points_url && (
+                              <a
+                                href={host.flow_points_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Cek Poin Google Flow"
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-indigo-400 hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 transition-colors"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            )}
                             <Button
                               variant="ghost"
                               size="icon"
@@ -483,9 +547,30 @@ export default function StokPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400">
-                      <Calendar className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-                      <span>Masa Aktif: {formatIndonesianDate(host.active_until)}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-neutral-600 dark:text-neutral-400">
+                        <Calendar className="h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                        <span>Masa Aktif: {formatIndonesianDate(host.active_until)}</span>
+                      </div>
+                      {(host.flow_points !== undefined && host.flow_points !== null) && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <Zap className="h-3.5 w-3.5 text-neutral-400" />
+                          <span className={`font-semibold px-2 py-0.5 rounded-full ${
+                            host.flow_points >= 100
+                              ? 'bg-emerald-500/10 text-emerald-400'
+                              : host.flow_points > 0
+                                ? 'bg-amber-500/10 text-amber-400'
+                                : 'bg-red-500/10 text-red-400'
+                          }`}>
+                            {host.flow_points.toLocaleString('id-ID')} Flow
+                          </span>
+                          {host.flow_points_url && (
+                            <a href={host.flow_points_url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors">
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -589,6 +674,35 @@ export default function StokPage() {
                     <SelectItem value="nonaktif">Nonaktif</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="border-t border-neutral-200 dark:border-neutral-800 pt-4 space-y-4">
+              <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Google Flow (Opsional)</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="form-flow-points" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Sisa Poin Flow</Label>
+                  <Input
+                    id="form-flow-points"
+                    type="number"
+                    min={0}
+                    placeholder="misal: 500"
+                    value={flowPoints}
+                    onChange={(e) => setFlowPoints(e.target.value)}
+                    className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 focus:border-purple-500/50 text-neutral-800 dark:text-neutral-100"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="form-flow-url" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">URL Google One</Label>
+                  <Input
+                    id="form-flow-url"
+                    type="url"
+                    placeholder="https://one.google.com/ai/activity"
+                    value={flowPointsUrl}
+                    onChange={(e) => setFlowPointsUrl(e.target.value)}
+                    className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 focus:border-purple-500/50 text-neutral-800 dark:text-neutral-100"
+                  />
+                </div>
               </div>
             </div>
 
