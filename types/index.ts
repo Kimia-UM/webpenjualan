@@ -8,10 +8,9 @@ export interface HostAccount {
   billing_type: BillingType;
   total_slot: number;
   active_until: string; // YYYY-MM-DD
-  status: HostStatus;
   created_at: number; // Timestamp (e.g., Date.now())
   flow_points?: number;    // Sisa poin Google Flow (diisi manual oleh admin)
-  flow_points_url?: string; // URL Google One khusus akun ini
+  capital_price?: number; // Modal akun (harga beli)
 }
 
 export type SubscriptionStatus = 'aktif' | 'akan_habis' | 'habis';

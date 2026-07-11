@@ -44,8 +44,65 @@ import {
   XCircle,
   Users,
   ExternalLink,
-  Zap
+  Zap,
+  Settings2,
+  Wallet,
+  Save
 } from 'lucide-react';
+
+function CapitalInput({ host }: { host: HostAccount }) {
+  const [val, setVal] = useState<string>(host.capital_price !== undefined && host.capital_price !== null ? String(host.capital_price) : '');
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    setVal(host.capital_price !== undefined && host.capital_price !== null ? String(host.capital_price) : '');
+  }, [host.capital_price]);
+
+  const handleSave = async () => {
+    if (!host.id) return;
+    setIsSaving(true);
+    setIsSaved(false);
+    try {
+      const parsed = val.trim() !== '' ? Number(val) : null;
+      if (parsed !== (host.capital_price || null)) {
+        await update(ref(db, `host_accounts/${host.id}`), { capital_price: parsed });
+      }
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 2000);
+    } catch (err) {
+      console.error("Error saving capital:", err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const isChanged = (val.trim() !== '' ? Number(val) : null) !== (host.capital_price || null);
+
+  return (
+    <div className="flex items-center justify-end gap-2 w-full max-w-[280px]">
+      <div className="relative flex-1">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm">Rp</span>
+        <Input
+          type="number"
+          min={0}
+          value={val}
+          onChange={(e) => setVal(e.target.value)}
+          placeholder="0"
+          className="pl-9 h-9 text-sm bg-white dark:bg-neutral-950 border-neutral-300 dark:border-neutral-700 focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50"
+        />
+      </div>
+      <Button
+        size="sm"
+        onClick={handleSave}
+        disabled={isSaving || !isChanged}
+        className={`h-9 px-3 shrink-0 ${isSaved ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-purple-600 hover:bg-purple-700 text-white'}`}
+      >
+        {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : isSaved ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
+      </Button>
+    </div>
+  );
+}
 
 export default function StokPage() {
   const [hostAccounts, setHostAccounts] = useState<HostAccount[]>([]);
@@ -58,6 +115,7 @@ export default function StokPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [currentHost, setCurrentHost] = useState<HostAccount | null>(null);
+  const [customerInfoHost, setCustomerInfoHost] = useState<HostAccount | null>(null);
 
   // Form states
   const [email, setEmail] = useState('');
@@ -66,7 +124,6 @@ export default function StokPage() {
   const [activeUntil, setActiveUntil] = useState('');
   const [status, setStatus] = useState<HostStatus>('proses');
   const [flowPoints, setFlowPoints] = useState<string>('');
-  const [flowPointsUrl, setFlowPointsUrl] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -139,7 +196,6 @@ export default function StokPage() {
     setActiveUntil('');
     setStatus('proses');
     setFlowPoints('');
-    setFlowPointsUrl('');
     setFormError(null);
     setIsFormOpen(true);
   };
@@ -153,7 +209,6 @@ export default function StokPage() {
     setActiveUntil(host.active_until);
     setStatus(host.status);
     setFlowPoints(host.flow_points !== undefined ? String(host.flow_points) : '');
-    setFlowPointsUrl(host.flow_points_url || '');
     setFormError(null);
     setIsFormOpen(true);
   };
@@ -178,7 +233,6 @@ export default function StokPage() {
 
     try {
       const flowPointsParsed = flowPoints.trim() !== '' ? Number(flowPoints) : null;
-      const flowPointsUrlValue = flowPointsUrl.trim() !== '' ? flowPointsUrl.trim() : null;
 
       if (currentHost?.id) {
         // Edit mode
@@ -190,7 +244,6 @@ export default function StokPage() {
           active_until: activeUntil,
           status: status,
           flow_points: flowPointsParsed,
-          flow_points_url: flowPointsUrlValue,
         };
         await update(hostRef, updateData);
       } else {
@@ -205,7 +258,6 @@ export default function StokPage() {
           status: status,
           created_at: Date.now(),
           flow_points: flowPointsParsed,
-          flow_points_url: flowPointsUrlValue,
         });
       }
       setIsFormOpen(false);
@@ -266,7 +318,7 @@ export default function StokPage() {
   const filteredHosts = hostAccounts.filter(host => {
     const matchesSearch = host.account_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           host.status.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesBilling = filterBillingType === 'semua' || host.billing_type === filterBillingType;
+    const matchesBilling = filterBillingType === 'semua' || filterBillingType === 'manajemen_modal' || host.billing_type === filterBillingType;
     return matchesSearch && matchesBilling;
   });
 
@@ -283,13 +335,23 @@ export default function StokPage() {
               Kelola akun induk premium beserta sisa slot dan masa aktif.
             </p>
           </div>
-          <Button
-            onClick={handleAddOpen}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white gap-2 self-start sm:self-center font-medium shadow-md shadow-purple-900/10"
-          >
-            <Plus className="h-4.5 w-4.5" />
-            <span>Tambah Akun</span>
-          </Button>
+          <div className="flex gap-3 self-start sm:self-center">
+            <Button
+              variant="outline"
+              onClick={() => window.open('https://one.google.com/ai/activity', '_blank')}
+              className="border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900 gap-2 font-medium"
+            >
+              <ExternalLink className="h-4.5 w-4.5" />
+              <span>Cek Flow Poin</span>
+            </Button>
+            <Button
+              onClick={handleAddOpen}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white gap-2 font-medium shadow-md shadow-purple-900/10"
+            >
+              <Plus className="h-4.5 w-4.5" />
+              <span>Tambah Akun</span>
+            </Button>
+          </div>
         </div>
 
         {/* Stats Overview */}
@@ -339,18 +401,19 @@ export default function StokPage() {
             />
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
-            {['semua', 'harian', 'mingguan', 'bulanan'].map((type) => (
+          <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar items-center">
+            {['semua', 'harian', 'mingguan', 'bulanan', 'manajemen_modal'].map((type) => (
               <button
                 key={type}
                 onClick={() => setFilterBillingType(type)}
-                className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
                   filterBillingType === type
                     ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
                     : 'bg-white dark:bg-neutral-900/40 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800'
                 }`}
               >
-                {type === 'semua' ? 'Semua Tipe' : type.charAt(0).toUpperCase() + type.slice(1)}
+                {type === 'manajemen_modal' && <Wallet className="h-3.5 w-3.5" />}
+                {type === 'semua' ? 'Semua Tipe' : type === 'manajemen_modal' ? 'Manajemen Modal' : type.charAt(0).toUpperCase() + type.slice(1)}
               </button>
             ))}
           </div>
@@ -373,6 +436,49 @@ export default function StokPage() {
             <p className="text-sm text-muted-foreground max-w-sm mt-1.5">
               {searchQuery ? 'Tidak ada hasil pencarian yang cocok.' : 'Belum ada akun induk yang terdaftar. Tambahkan akun baru sekarang.'}
             </p>
+          </div>
+        ) : filterBillingType === 'manajemen_modal' ? (
+          <div className="border border-neutral-200 dark:border-neutral-900 rounded-xl overflow-hidden bg-white dark:bg-neutral-950/20 transition-colors">
+            <Table>
+              <TableHeader className="bg-neutral-50/80 dark:bg-neutral-950/60">
+                <TableRow className="border-b border-neutral-200 dark:border-neutral-900 hover:bg-transparent">
+                  <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold py-4">Email Akun Induk</TableHead>
+                  <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-right">Pendapatan</TableHead>
+                  <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-right">Profit Bersih</TableHead>
+                  <TableHead className="text-neutral-500 dark:text-neutral-400 font-semibold text-right pr-6 w-1/4">Harga Modal (Rp)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredHosts.map((host) => {
+                  const pendapatan = subscriptions
+                    .filter(sub => sub.host_account_id === host.id)
+                    .reduce((total, sub) => total + (sub.price || 0), 0);
+                  const modal = host.capital_price || 0;
+                  const profit = pendapatan - modal;
+                  const isProfit = profit >= 0;
+
+                  return (
+                  <TableRow key={host.id} className="border-b border-neutral-200 dark:border-neutral-900 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/10 transition-colors">
+                    <TableCell className="font-medium text-neutral-800 dark:text-neutral-200 py-4">
+                      {host.account_email}
+                      <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 capitalize">{host.billing_type}</div>
+                    </TableCell>
+                    <TableCell className="text-right font-medium text-emerald-600 dark:text-emerald-400">
+                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(pendapatan)}
+                    </TableCell>
+                    <TableCell className={`text-right font-medium ${isProfit ? 'text-indigo-600 dark:text-indigo-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(profit)}
+                    </TableCell>
+                    <TableCell className="text-right pr-6 py-2">
+                      <div className="flex items-center justify-end w-full">
+                        <CapitalInput host={host} />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
         ) : (
           <>
@@ -448,17 +554,15 @@ export default function StokPage() {
                         </TableCell>
                         <TableCell className="text-right py-4.5 pr-6">
                           <div className="flex items-center justify-end gap-2">
-                            {host.flow_points_url && (
-                              <a
-                                href={host.flow_points_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title="Cek Poin Google Flow"
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-indigo-400 hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 transition-colors"
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setCustomerInfoHost(host)}
+                              className="h-8 w-8 text-indigo-500 hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20"
+                              title="Info Customer"
+                            >
+                              <Users className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -509,6 +613,15 @@ export default function StokPage() {
                         </div>
                       </div>
                       <div className="flex gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setCustomerInfoHost(host)}
+                          className="h-8 w-8 text-indigo-500 hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20"
+                          title="Info Customer"
+                        >
+                          <Users className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -564,11 +677,6 @@ export default function StokPage() {
                           }`}>
                             {host.flow_points.toLocaleString('id-ID')} Flow
                           </span>
-                          {host.flow_points_url && (
-                            <a href={host.flow_points_url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 transition-colors">
-                              <ExternalLink className="h-3.5 w-3.5" />
-                            </a>
-                          )}
                         </div>
                       )}
                     </div>
@@ -679,30 +787,17 @@ export default function StokPage() {
 
             <div className="border-t border-neutral-200 dark:border-neutral-800 pt-4 space-y-4">
               <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Google Flow (Opsional)</p>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="form-flow-points" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Sisa Poin Flow</Label>
-                  <Input
-                    id="form-flow-points"
-                    type="number"
-                    min={0}
-                    placeholder="misal: 500"
-                    value={flowPoints}
-                    onChange={(e) => setFlowPoints(e.target.value)}
-                    className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 focus:border-purple-500/50 text-neutral-800 dark:text-neutral-100"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="form-flow-url" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">URL Google One</Label>
-                  <Input
-                    id="form-flow-url"
-                    type="url"
-                    placeholder="https://one.google.com/ai/activity"
-                    value={flowPointsUrl}
-                    onChange={(e) => setFlowPointsUrl(e.target.value)}
-                    className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 focus:border-purple-500/50 text-neutral-800 dark:text-neutral-100"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="form-flow-points" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Sisa Poin Flow</Label>
+                <Input
+                  id="form-flow-points"
+                  type="number"
+                  min={0}
+                  placeholder="misal: 500"
+                  value={flowPoints}
+                  onChange={(e) => setFlowPoints(e.target.value)}
+                  className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 focus:border-purple-500/50 text-neutral-800 dark:text-neutral-100 w-full"
+                />
               </div>
             </div>
 
@@ -774,6 +869,70 @@ export default function StokPage() {
               ) : (
                 'Ya, Hapus'
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customer Info Dialog */}
+      <Dialog open={!!customerInfoHost} onOpenChange={(open) => { if (!open) setCustomerInfoHost(null); }}>
+        <DialogContent className="border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0c0c0e] text-neutral-800 dark:text-neutral-100 max-w-2xl rounded-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
+              <Users className="h-5 w-5 text-indigo-500" />
+              Info Customer di Akun Ini
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground text-xs">
+              Melihat daftar customer yang berada di dalam akun {customerInfoHost?.account_email}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="overflow-y-auto pr-2 py-2 flex-1 space-y-3 mt-2">
+            {customerInfoHost && (() => {
+              const custSubs = subscriptions.filter(s => {
+                if (s.host_account_id !== customerInfoHost.id) return false;
+                if (!s.expiry_date) return false;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const expiry = new Date(s.expiry_date);
+                expiry.setHours(0, 0, 0, 0);
+                return expiry.getTime() >= today.getTime();
+              });
+              if (custSubs.length === 0) return <div className="text-center py-8 text-neutral-500 text-sm">Belum ada customer di akun ini.</div>;
+              
+              return (
+                <div className="border border-neutral-200 dark:border-neutral-900 rounded-xl overflow-hidden bg-white dark:bg-neutral-950/20">
+                  <Table>
+                    <TableHeader className="bg-neutral-50/80 dark:bg-neutral-950/60">
+                      <TableRow className="border-b border-neutral-200 dark:border-neutral-900">
+                        <TableHead className="text-neutral-500 font-semibold py-3">Email Customer</TableHead>
+                        <TableHead className="text-neutral-500 font-semibold text-center">Durasi</TableHead>
+                        <TableHead className="text-neutral-500 font-semibold text-right pr-4">Masa Aktif</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {custSubs.map(sub => (
+                        <TableRow key={sub.id} className="border-b border-neutral-200 dark:border-neutral-900">
+                          <TableCell className="font-medium text-neutral-800 dark:text-neutral-200 py-3">{sub.customer_email}</TableCell>
+                          <TableCell className="text-center text-neutral-600 dark:text-neutral-400 capitalize">{sub.duration_label}</TableCell>
+                          <TableCell className="text-right pr-4 text-neutral-700 dark:text-neutral-300">
+                            {formatIndonesianDate(sub.expiry_date)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              );
+            })()}
+          </div>
+          <DialogFooter className="pt-4 mt-2 border-t border-neutral-200 dark:border-neutral-800 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setCustomerInfoHost(null)}
+              className="text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+            >
+              Tutup
             </Button>
           </DialogFooter>
         </DialogContent>

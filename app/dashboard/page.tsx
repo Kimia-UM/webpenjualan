@@ -88,6 +88,8 @@ export default function DashboardUtamaPage() {
 
   // PremiumShare
   const psRevenue = subscriptions.reduce((s, x) => s + (x.price || 0), 0);
+  const psCapital = hostAccounts.reduce((s, x) => s + (x.capital_price || 0), 0);
+  const psProfit = psRevenue - psCapital;
   const psAktif = subscriptions.filter(x => getStatus(x.expiry_date) === 'aktif').length;
   const psAkanHabis = subscriptions.filter(x => getStatus(x.expiry_date) === 'akan_habis');
   const psHabis = subscriptions.filter(x => getStatus(x.expiry_date) === 'habis').length;
@@ -103,7 +105,7 @@ export default function DashboardUtamaPage() {
 
   // Grand totals
   const grandRevenue = psRevenue + appsRevenue + privatRevenue;
-  const grandProfit = psRevenue + appsProfit + privatProfit; // PS revenue = PS profit assumption
+  const grandProfit = psProfit + appsProfit + privatProfit;
   const grandTransactions = subscriptions.length + appsItems.length + privatItems.length;
 
   if (loading) {
@@ -205,9 +207,15 @@ export default function DashboardUtamaPage() {
                 <span className="text-neutral-500 dark:text-neutral-400">Total Transaksi</span>
                 <strong className="text-neutral-800 dark:text-neutral-200">{subscriptions.length} akun</strong>
               </div>
-              <div className="flex items-center justify-between py-1.5">
+              <div className="flex items-center justify-between py-1.5 border-b border-neutral-100 dark:border-neutral-900">
                 <span className="text-neutral-500 dark:text-neutral-400">Total Pendapatan</span>
                 <strong className="text-purple-600 dark:text-purple-400">{formatRupiah(psRevenue)}</strong>
+              </div>
+              <div className="flex items-center justify-between py-1.5">
+                <span className="text-neutral-500 dark:text-neutral-400">Total Keuntungan</span>
+                <strong className={`font-bold ${psProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {formatRupiah(psProfit)}
+                </strong>
               </div>
             </div>
 

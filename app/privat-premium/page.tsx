@@ -137,7 +137,8 @@ export default function PrivatPremiumPage() {
       return sellingPrice; // 100% refund in first 10 days
     }
     
-    const monthsUsed = Math.ceil((diffDays - 10) / 30);
+    // Day 11-30 is 1 month used, Day 31-60 is 2 months used, etc.
+    const monthsUsed = Math.ceil(diffDays / 30);
     const deduction = monthsUsed * deductionPerMonth;
     const refund = Math.max(0, sellingPrice - deduction);
     

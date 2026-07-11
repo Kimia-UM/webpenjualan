@@ -16,7 +16,8 @@ import {
   ShieldCheck,
   UserPlus,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Wallet
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -153,6 +154,10 @@ export default function DashboardPage() {
 
   // All-Time Revenue
   const revenueAllTime = subscriptions.reduce((sum, sub) => sum + (sub.price || 0), 0);
+  
+  // Total Capital & Profit
+  const capitalAllTime = hostAccounts.reduce((sum, host) => sum + (host.capital_price || 0), 0);
+  const profitAllTime = revenueAllTime - capitalAllTime;
 
   const activeCustomersCount = subscriptions.filter(sub => {
     const status = getSubscriptionStatus(sub.expiry_date);
@@ -265,7 +270,7 @@ export default function DashboardPage() {
         )}
 
         {/* Metrics Grid */}
-        <div className="grid gap-5 grid-cols-2 lg:grid-cols-4 mb-10">
+        <div className="grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-5 mb-10">
           <div className="rounded-xl border border-neutral-200 dark:border-neutral-900 bg-neutral-50/50 dark:bg-neutral-950/20 p-4 sm:p-5 flex flex-col justify-between min-h-[110px]">
             <span className="text-[10px] sm:text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Pendapatan Hari Ini</span>
             <div className="flex items-baseline justify-between mt-2 flex-wrap gap-1">
@@ -287,6 +292,16 @@ export default function DashboardPage() {
             <div className="flex items-baseline justify-between mt-2 flex-wrap gap-1">
               <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-neutral-800 dark:text-neutral-200">{formatRupiah(revenueAllTime)}</h3>
               <TrendingUp className="h-4 w-4 text-indigo-500 shrink-0" />
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-neutral-200 dark:border-neutral-900 bg-neutral-50/50 dark:bg-neutral-950/20 p-4 sm:p-5 flex flex-col justify-between min-h-[110px]">
+            <span className="text-[10px] sm:text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Total Profit Bersih</span>
+            <div className="flex items-baseline justify-between mt-2 flex-wrap gap-1">
+              <h3 className={`text-lg sm:text-xl md:text-2xl font-bold ${profitAllTime >= 0 ? 'text-indigo-600 dark:text-indigo-400' : 'text-red-600 dark:text-red-400'}`}>
+                {formatRupiah(profitAllTime)}
+              </h3>
+              <Wallet className="h-4 w-4 text-purple-500 shrink-0" />
             </div>
           </div>
 
