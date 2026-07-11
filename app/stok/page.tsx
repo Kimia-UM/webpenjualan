@@ -317,7 +317,7 @@ export default function StokPage() {
   // Filter host accounts based on search query and billing type
   const filteredHosts = hostAccounts.filter(host => {
     const matchesSearch = host.account_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          host.status.toLowerCase().includes(searchQuery.toLowerCase());
+                          (host.status || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesBilling = filterBillingType === 'semua' || filterBillingType === 'manajemen_modal' || host.billing_type === filterBillingType;
     return matchesSearch && matchesBilling;
   });
