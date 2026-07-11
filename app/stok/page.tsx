@@ -207,7 +207,7 @@ export default function StokPage() {
     setBillingType(host.billing_type);
     setTotalSlot(host.total_slot);
     setActiveUntil(host.active_until);
-    setStatus(host.status);
+    setStatus(host.status || 'proses');
     setFlowPoints(host.flow_points !== undefined ? String(host.flow_points) : '');
     setFormError(null);
     setIsFormOpen(true);
