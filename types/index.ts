@@ -9,6 +9,7 @@ export interface HostAccount {
   total_slot: number;
   active_until: string; // YYYY-MM-DD
   created_at: number; // Timestamp (e.g., Date.now())
+  status?: HostStatus;
   flow_points?: number;    // Sisa poin Google Flow (diisi manual oleh admin)
   capital_price?: number; // Modal akun (harga beli)
 }
