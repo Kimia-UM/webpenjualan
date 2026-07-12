@@ -812,7 +812,7 @@ export default function AppsPremiumPage() {
 
             <div className="space-y-2">
               <Label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Aplikasi</Label>
-              <Select value={appName} onValueChange={(val) => setAppName(val)}>
+              <Select value={appName} onValueChange={(val) => setAppName(val || '')}>
                 <SelectTrigger className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                   <SelectValue placeholder="Pilih Aplikasi" />
                 </SelectTrigger>
@@ -1036,7 +1036,7 @@ export default function AppsPremiumPage() {
 
             <div className="space-y-2">
               <Label className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Aplikasi</Label>
-              <Select value={editForm.appName} onValueChange={(val) => setEditForm({ ...editForm, appName: val })}>
+              <Select value={editForm.appName} onValueChange={(val) => setEditForm({ ...editForm, appName: val || '' })}>
                 <SelectTrigger className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
                   <SelectValue placeholder="Pilih Aplikasi" />
                 </SelectTrigger>
