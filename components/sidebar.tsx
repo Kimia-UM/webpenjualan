@@ -42,12 +42,11 @@ const premiumShareGroup = {
   colorIcon: 'text-purple-500',
   activeText: 'text-purple-700 dark:text-purple-400',
   // A route is "active" if any sub-item is active
-  matchPaths: ['/', '/stok', '/customers', '/laporan'],
+  matchPaths: ['/', '/stok', '/customers'],
   children: [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
     { name: 'Stok Akun', href: '/stok', icon: Database },
     { name: 'Manajemen Customer', href: '/customers', icon: Users },
-    { name: 'Laporan', href: '/laporan', icon: FileText },
   ],
 };
 
@@ -57,11 +56,10 @@ const productGroups = [
     name: 'Apps Premium',
     icon: AppWindow,
     colorIcon: 'text-orange-500',
-    matchPaths: ['/apps-premium', '/apps-premium/dashboard', '/apps-premium/laporan'],
+    matchPaths: ['/apps-premium', '/apps-premium/dashboard'],
     children: [
       { name: 'Dashboard', href: '/apps-premium/dashboard', icon: LayoutDashboard },
       { name: 'Manajemen Apps', href: '/apps-premium', icon: AppWindow },
-      { name: 'Laporan', href: '/apps-premium/laporan', icon: FileText },
     ],
     activeBg: 'bg-orange-50 dark:bg-orange-950/40',
     activeBorder: 'border-orange-200 dark:border-orange-900/60',
@@ -72,11 +70,10 @@ const productGroups = [
     name: 'Privat Premium',
     icon: ShieldCheck,
     colorIcon: 'text-teal-500',
-    matchPaths: ['/privat-premium', '/privat-premium/dashboard', '/privat-premium/laporan'],
+    matchPaths: ['/privat-premium', '/privat-premium/dashboard'],
     children: [
       { name: 'Dashboard', href: '/privat-premium/dashboard', icon: LayoutDashboard },
       { name: 'Manajemen Privat', href: '/privat-premium', icon: ShieldCheck },
-      { name: 'Laporan', href: '/privat-premium/laporan', icon: FileText },
     ],
     activeBg: 'bg-teal-50 dark:bg-teal-950/40',
     activeBorder: 'border-teal-200 dark:border-teal-900/60',
@@ -182,6 +179,23 @@ export default function Sidebar({
         >
           <BarChart3 className={`h-4 w-4 shrink-0 ${pathname === '/dashboard' ? 'text-indigo-600 dark:text-indigo-400' : 'text-indigo-500'}`} />
           {!collapsed && <span>Dashboard Utama</span>}
+        </Link>
+
+        {/* ② Pusat Laporan ───────────────────────────────────────────── */}
+        <Link
+          href="/laporan"
+          onClick={onLinkClick}
+          title={collapsed ? 'Pusat Laporan' : undefined}
+          className={[
+            'flex items-center gap-2.5 rounded-xl text-sm font-semibold transition-all duration-150 border mb-1',
+            collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5',
+            pathname === '/laporan' || pathname.startsWith('/laporan/')
+              ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900/60 text-blue-700 dark:text-blue-400'
+              : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 border-transparent',
+          ].join(' ')}
+        >
+          <FileText className={`h-4 w-4 shrink-0 ${pathname === '/laporan' || pathname.startsWith('/laporan/') ? 'text-blue-600 dark:text-blue-400' : 'text-blue-500'}`} />
+          {!collapsed && <span>Pusat Laporan</span>}
         </Link>
 
         {/* Separator */}

@@ -30,12 +30,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  Plus, 
-  Pencil, 
-  Trash2, 
-  Loader2, 
-  Search, 
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
+  Search,
   Database,
   Calendar,
   AlertCircle,
@@ -174,14 +174,14 @@ export default function StokPage() {
   const getSisaSlot = (hostId: string, totalSlot: number) => {
     const activeSubs = subscriptions.filter(sub => {
       if (sub.host_account_id !== hostId) return false;
-      
+
       // Calculate status dynamically based on expiry date
       if (!sub.expiry_date) return false;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const expiry = new Date(sub.expiry_date);
       expiry.setHours(0, 0, 0, 0);
-      
+
       return expiry.getTime() >= today.getTime(); // Not expired (active or expiring)
     });
     return totalSlot - activeSubs.length;
@@ -317,7 +317,7 @@ export default function StokPage() {
   // Filter host accounts based on search query and billing type
   const filteredHosts = hostAccounts.filter(host => {
     const matchesSearch = host.account_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (host.status || '').toLowerCase().includes(searchQuery.toLowerCase());
+      (host.status || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesBilling = filterBillingType === 'semua' || filterBillingType === 'manajemen_modal' || host.billing_type === filterBillingType;
     return matchesSearch && matchesBilling;
   });
@@ -379,8 +379,8 @@ export default function StokPage() {
             </div>
             <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-400">
               {hostAccounts.filter(h => h.status === 'aktif').reduce((sum, h) => {
-                 const sisa = h.id ? getSisaSlot(h.id, h.total_slot) : h.total_slot;
-                 return sum + (h.total_slot - sisa);
+                const sisa = h.id ? getSisaSlot(h.id, h.total_slot) : h.total_slot;
+                return sum + (h.total_slot - sisa);
               }, 0)}
             </p>
           </div>
@@ -406,11 +406,10 @@ export default function StokPage() {
               <button
                 key={type}
                 onClick={() => setFilterBillingType(type)}
-                className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                  filterBillingType === type
+                className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 ${filterBillingType === type
                     ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
                     : 'bg-white dark:bg-neutral-900/40 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800'
-                }`}
+                  }`}
               >
                 {type === 'manajemen_modal' && <Wallet className="h-3.5 w-3.5" />}
                 {type === 'semua' ? 'Semua Tipe' : type === 'manajemen_modal' ? 'Manajemen Modal' : type.charAt(0).toUpperCase() + type.slice(1)}
@@ -458,23 +457,23 @@ export default function StokPage() {
                   const isProfit = profit >= 0;
 
                   return (
-                  <TableRow key={host.id} className="border-b border-neutral-200 dark:border-neutral-900 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/10 transition-colors">
-                    <TableCell className="font-medium text-neutral-800 dark:text-neutral-200 py-4">
-                      {host.account_email}
-                      <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 capitalize">{host.billing_type}</div>
-                    </TableCell>
-                    <TableCell className="text-right font-medium text-emerald-600 dark:text-emerald-400">
-                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(pendapatan)}
-                    </TableCell>
-                    <TableCell className={`text-right font-medium ${isProfit ? 'text-indigo-600 dark:text-indigo-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(profit)}
-                    </TableCell>
-                    <TableCell className="text-right pr-6 py-2">
-                      <div className="flex items-center justify-end w-full">
-                        <CapitalInput host={host} />
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                    <TableRow key={host.id} className="border-b border-neutral-200 dark:border-neutral-900 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/10 transition-colors">
+                      <TableCell className="font-medium text-neutral-800 dark:text-neutral-200 py-4">
+                        {host.account_email}
+                        <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 capitalize">{host.billing_type}</div>
+                      </TableCell>
+                      <TableCell className="text-right font-medium text-emerald-600 dark:text-emerald-400">
+                        {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(pendapatan)}
+                      </TableCell>
+                      <TableCell className={`text-right font-medium ${isProfit ? 'text-indigo-600 dark:text-indigo-400' : 'text-red-600 dark:text-red-400'}`}>
+                        {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(profit)}
+                      </TableCell>
+                      <TableCell className="text-right pr-6 py-2">
+                        <div className="flex items-center justify-end w-full">
+                          <CapitalInput host={host} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
               </TableBody>
@@ -506,25 +505,23 @@ export default function StokPage() {
                         <TableCell className="capitalize text-neutral-700 dark:text-neutral-300">{host.billing_type}</TableCell>
                         <TableCell className="text-center text-neutral-700 dark:text-neutral-300">{host.total_slot}</TableCell>
                         <TableCell className="text-center">
-                          <span className={`font-semibold px-2.5 py-1 rounded-full text-xs ${
-                            sisaSlotValue <= 0 
-                              ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
-                              : sisaSlotValue === 1 
-                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
+                          <span className={`font-semibold px-2.5 py-1 rounded-full text-xs ${sisaSlotValue <= 0
+                              ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                              : sisaSlotValue === 1
+                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                                 : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                          }`}>
+                            }`}>
                             {sisaSlotValue} Slot
                           </span>
                         </TableCell>
                         <TableCell className="text-center">
                           {host.flow_points !== undefined && host.flow_points !== null ? (
-                            <span className={`inline-flex items-center gap-1 font-semibold px-2.5 py-1 rounded-full text-xs border ${
-                              host.flow_points >= 100
+                            <span className={`inline-flex items-center gap-1 font-semibold px-2.5 py-1 rounded-full text-xs border ${host.flow_points >= 100
                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                 : host.flow_points > 0
                                   ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                                   : 'bg-red-500/10 text-red-400 border-red-500/20'
-                            }`}>
+                              }`}>
                               <Zap className="h-3 w-3" />
                               {host.flow_points.toLocaleString('id-ID')}
                             </span>
@@ -539,13 +536,12 @@ export default function StokPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-                            host.status === 'aktif'
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${host.status === 'aktif'
                               ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20'
                               : host.status === 'proses'
                                 ? 'bg-amber-500/5 text-amber-400 border-amber-500/20'
                                 : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 border-neutral-200 dark:border-neutral-700/60'
-                          }`}>
+                            }`}>
                             {host.status === 'aktif' && <CheckCircle2 className="h-3 w-3" />}
                             {host.status === 'proses' && <Clock className="h-3 w-3" />}
                             {host.status === 'nonaktif' && <XCircle className="h-3 w-3" />}
@@ -601,13 +597,12 @@ export default function StokPage() {
                           <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-900 text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-800">
                             {host.billing_type}
                           </span>
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border ${
-                            host.status === 'aktif'
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border ${host.status === 'aktif'
                               ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20'
                               : host.status === 'proses'
                                 ? 'bg-amber-500/5 text-amber-400 border-amber-500/20'
                                 : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400 border-neutral-200 dark:border-neutral-700/60'
-                          }`}>
+                            }`}>
                             <span className="capitalize">{host.status}</span>
                           </span>
                         </div>
@@ -648,13 +643,12 @@ export default function StokPage() {
                       </div>
                       <div>
                         <span className="text-neutral-500 dark:text-neutral-400 block mb-1">Sisa Slot</span>
-                        <strong className={`font-semibold px-2 py-0.5 rounded-full ${
-                          sisaSlotValue <= 0 
-                            ? 'bg-red-500/10 text-red-400' 
-                            : sisaSlotValue === 1 
-                              ? 'bg-amber-500/10 text-amber-400' 
+                        <strong className={`font-semibold px-2 py-0.5 rounded-full ${sisaSlotValue <= 0
+                            ? 'bg-red-500/10 text-red-400'
+                            : sisaSlotValue === 1
+                              ? 'bg-amber-500/10 text-amber-400'
                               : 'bg-emerald-500/10 text-emerald-400'
-                        }`}>
+                          }`}>
                           {sisaSlotValue} Slot
                         </strong>
                       </div>
@@ -668,13 +662,12 @@ export default function StokPage() {
                       {(host.flow_points !== undefined && host.flow_points !== null) && (
                         <div className="flex items-center gap-1.5 text-xs">
                           <Zap className="h-3.5 w-3.5 text-neutral-400" />
-                          <span className={`font-semibold px-2 py-0.5 rounded-full ${
-                            host.flow_points >= 100
+                          <span className={`font-semibold px-2 py-0.5 rounded-full ${host.flow_points >= 100
                               ? 'bg-emerald-500/10 text-emerald-400'
                               : host.flow_points > 0
                                 ? 'bg-amber-500/10 text-amber-400'
                                 : 'bg-red-500/10 text-red-400'
-                          }`}>
+                            }`}>
                             {host.flow_points.toLocaleString('id-ID')} Flow
                           </span>
                         </div>
@@ -724,8 +717,8 @@ export default function StokPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="form-billing" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Tipe Billing</Label>
-                <Select 
-                  value={billingType} 
+                <Select
+                  value={billingType}
                   onValueChange={(val) => { if (val) setBillingType(val as BillingType); }}
                 >
                   <SelectTrigger id="form-billing" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
@@ -769,8 +762,8 @@ export default function StokPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="form-status" className="text-xs font-semibold text-neutral-600 dark:text-neutral-300">Status</Label>
-                <Select 
-                  value={status} 
+                <Select
+                  value={status}
                   onValueChange={(val) => { if (val) setStatus(val as HostStatus); }}
                 >
                   <SelectTrigger id="form-status" className="bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 text-neutral-800 dark:text-neutral-200">
@@ -898,7 +891,7 @@ export default function StokPage() {
                 return expiry.getTime() >= today.getTime();
               });
               if (custSubs.length === 0) return <div className="text-center py-8 text-neutral-500 text-sm">Belum ada customer di akun ini.</div>;
-              
+
               return (
                 <div className="border border-neutral-200 dark:border-neutral-900 rounded-xl overflow-hidden bg-white dark:bg-neutral-950/20">
                   <Table>
