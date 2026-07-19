@@ -450,8 +450,7 @@ async function handleSessionState(
       } else if (dbField === 'payment_channel') {
         const keyboard = {
           keyboard: [
-            [{ text: "Lynk" }, { text: "Qris" }],
-            [{ text: "BCA" }, { text: "Mandiri" }],
+            [{ text: "QRIS" }],
             [{ text: "Batal" }]
           ],
           one_time_keyboard: true,
@@ -861,7 +860,7 @@ async function handleCsvUpload(botToken: string | undefined, chatId: number, fil
         const durationLabel = cols[1] || "1 Bulan";
         const expiryDateStr = parseIndoDate(cols[2]);
         const hostEmail = cols[3] ? cols[3].toLowerCase().trim() : "";
-        const paymentChannel = cols[4] || "Manual";
+        const paymentChannel = cols[4] || "QRIS";
         const price = parsePrice(cols[5]);
 
         if (!expiryDateStr || !hostEmail) {

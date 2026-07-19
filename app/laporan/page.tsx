@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Link from 'next/link';
-import { Users, AppWindow, ShieldCheck, ChevronRight, FileText } from 'lucide-react';
+import { Users, AppWindow, ShieldCheck, ChevronRight, FileText, Handshake } from 'lucide-react';
 
 const laporanCards = [
   {
@@ -31,6 +31,15 @@ const laporanCards = [
     colorIcon: 'text-teal-500',
     bgIcon: 'bg-teal-100 dark:bg-teal-900/30',
     hoverBorder: 'hover:border-teal-300 dark:hover:border-teal-700',
+  },
+  {
+    title: 'Laporan Seluruh Reseller',
+    description: 'Kelola laporan transaksi, keuntungan, dan aktivitas dari seluruh reseller.',
+    href: '/laporan/reseller',
+    icon: Handshake,
+    colorIcon: 'text-rose-500',
+    bgIcon: 'bg-rose-100 dark:bg-rose-900/30',
+    hoverBorder: 'hover:border-rose-300 dark:hover:border-rose-700',
   },
 ];
 

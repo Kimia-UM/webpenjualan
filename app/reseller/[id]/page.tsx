@@ -49,7 +49,7 @@ import {
 } from 'lucide-react';
 
 
-export default function CustomersPage() {
+export default function ResellerWorkspace({ params }: { params: { id: string } }) { const resellerId = params.id;
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [hostAccounts, setHostAccounts] = useState<HostAccount[]>([]);
   const [paymentChannels, setPaymentChannels] = useState<string[]>(['QRIS']);

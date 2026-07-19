@@ -6,7 +6,16 @@
       ".indexOn": ["status", "active_until"]
     },
     "subscriptions": {
-      ".indexOn": ["host_account_id", "status", "expiry_date"]
+      ".indexOn": ["host_account_id", "status", "expiry_date", "reseller_id"]
+    },
+    "resellers": {
+      ".indexOn": ["created_at", "name"]
+    },
+    "reseller_orders": {
+      ".indexOn": ["reseller_id", "order_date", "expiry_date"]
+    },
+    "withdrawals": {
+      ".indexOn": ["date", "created_at"]
     }
   }
 }

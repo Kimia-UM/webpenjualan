@@ -20,6 +20,7 @@ import {
   FileText,
   Box,
   BarChart3,
+  Handshake,
 } from 'lucide-react';
 
 // ─── Navigation Structure ─────────────────────────────────────────────────────
@@ -82,6 +83,21 @@ const productGroups = [
   },
 ];
 
+// Reseller group
+const resellerGroup = {
+  name: 'Reseller',
+  icon: Handshake,
+  colorIcon: 'text-rose-500',
+  matchPaths: ['/reseller'],
+  children: [
+    { name: 'Manajemen Reseller', href: '/reseller', icon: Handshake },
+  ],
+  activeBg: 'bg-rose-50 dark:bg-rose-950/40',
+  activeBorder: 'border-rose-200 dark:border-rose-900/60',
+  activeText: 'text-rose-700 dark:text-rose-400',
+  childActive: 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400',
+};
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface SidebarProps {
@@ -110,6 +126,7 @@ export default function Sidebar({
   const [groupOpen, setGroupOpen] = useState<Record<string, boolean>>(() => ({
     'Apps Premium': productGroups[0].matchPaths.some(p => pathname === p || pathname.startsWith(p + '/')),
     'Privat Premium': productGroups[1].matchPaths.some(p => pathname === p || pathname.startsWith(p + '/')),
+    'Reseller': resellerGroup.matchPaths.some(p => pathname === p || pathname.startsWith(p + '/')),
   }));
 
   const handleLogout = async () => {
@@ -315,6 +332,66 @@ export default function Sidebar({
             </React.Fragment>
           );
         })}
+
+        {/* ⑤ Separator + Reseller ─────────────────────────────────────── */}
+        <div className="py-1">
+          <div className="border-t border-neutral-100 dark:border-neutral-800/60" />
+        </div>
+        {(() => {
+          const group = resellerGroup;
+          const GroupIcon = group.icon;
+          const isGroupActive = group.matchPaths.some(p => pathname === p || pathname.startsWith(p + '/'));
+          const isOpen = groupOpen[group.name];
+          return (
+            <div>
+              <button
+                onClick={() => !collapsed && setGroupOpen(prev => ({ ...prev, [group.name]: !prev[group.name] }))}
+                title={collapsed ? group.name : undefined}
+                className={[
+                  'w-full flex items-center rounded-xl text-sm font-semibold transition-all duration-150 border',
+                  collapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5 justify-between',
+                  isGroupActive
+                    ? `${group.activeBg} ${group.activeBorder} ${group.activeText}`
+                    : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 border-transparent',
+                ].join(' ')}
+              >
+                <div className="flex items-center gap-2.5">
+                  <GroupIcon className={`h-4 w-4 shrink-0 ${isGroupActive ? group.activeText : group.colorIcon}`} />
+                  {!collapsed && <span>{group.name}</span>}
+                </div>
+                {!collapsed && (
+                  <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-neutral-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                )}
+              </button>
+              {(isOpen || collapsed) && (
+                <div className="mt-0.5 space-y-0.5">
+                  {group.children.map(child => {
+                    const ChildIcon = child.icon;
+                    const isActive = pathname === child.href || pathname.startsWith(child.href + '/');
+                    return (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        onClick={onLinkClick}
+                        title={collapsed ? child.name : undefined}
+                        className={[
+                          'flex items-center gap-2.5 rounded-xl text-sm font-medium transition-all duration-150 border',
+                          collapsed ? 'justify-center px-2 py-2.5' : 'pl-8 pr-3 py-2',
+                          isActive
+                            ? group.childActive
+                            : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/60 border-transparent',
+                        ].join(' ')}
+                      >
+                        <ChildIcon className={`h-3.5 w-3.5 shrink-0 ${isActive ? group.activeText : 'text-neutral-400 dark:text-neutral-500'}`} />
+                        {!collapsed && <span className="truncate">{child.name}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </nav>
 
       {/* ── Bottom Section ── */}
