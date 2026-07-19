@@ -909,7 +909,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
               <Label>Akun</Label><Input value={orderForm.account} onChange={e => setOrderForm(f => ({ ...f, account: e.target.value }))} />
               <Label>Tgl Order</Label><Input type="date" value={orderForm.orderDate} onChange={e => setOrderForm(f => ({ ...f, orderDate: e.target.value }))} />
               <Label>Durasi</Label>
-              <Select value={orderForm.variation} onValueChange={v => setOrderForm(f => ({ ...f, variation: v }))}>
+              <Select value={orderForm.variation} onValueChange={v => setOrderForm(f => ({ ...f, variation: v || '' }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{VARIATION_OPTIONS.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent>
               </Select>
@@ -945,7 +945,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
               <Label>Akun</Label><Input value={orderForm.account} onChange={e => setOrderForm(f => ({ ...f, account: e.target.value }))} />
               <Label>Tgl Order</Label><Input type="date" value={orderForm.orderDate} onChange={e => setOrderForm(f => ({ ...f, orderDate: e.target.value }))} />
               <Label>Durasi</Label>
-              <Select value={orderForm.variation} onValueChange={v => setOrderForm(f => ({ ...f, variation: v }))}>
+              <Select value={orderForm.variation} onValueChange={v => setOrderForm(f => ({ ...f, variation: v || '' }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{VARIATION_OPTIONS.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent>
               </Select>
@@ -971,7 +971,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
             <div className="py-4 space-y-3 text-sm">
               <Label>Email Customer</Label><Input value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} placeholder="email@contoh.com" />
               <Label>Pilih Akun Induk (Host)</Label>
-              <Select value={hostAccountId} onValueChange={setHostAccountId}>
+              <Select value={hostAccountId} onValueChange={v => setHostAccountId(v || '')}>
                 <SelectTrigger><SelectValue placeholder="Pilih akun induk" /></SelectTrigger>
                 <SelectContent>
                   {availableHosts.map(h => (
@@ -982,7 +982,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
               </Select>
               <Label>Tgl Mulai</Label><Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
               <Label>Durasi</Label>
-              <Select value={durationPreset} onValueChange={setDurationPreset}>
+              <Select value={durationPreset} onValueChange={v => setDurationPreset(v || '')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1_bulan">1 Bulan</SelectItem>
@@ -1004,7 +1004,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Pembayaran</Label>
-                  <Select value={paymentChannel} onValueChange={setPaymentChannel}>
+                  <Select value={paymentChannel} onValueChange={v => setPaymentChannel(v || '')}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>{paymentChannels.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                   </Select>
@@ -1027,7 +1027,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
           <form onSubmit={handleRenewPSSubmit}>
             <div className="py-4 space-y-3 text-sm">
               <Label>Mulai Perpanjangan</Label>
-              <Select value={renewFromOldExpiry} onValueChange={setRenewFromOldExpiry}>
+              <Select value={renewFromOldExpiry} onValueChange={v => setRenewFromOldExpiry(v || '')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="true">Dari tanggal habis lama ({psTarget?.expiry_date ? formatDate(psTarget.expiry_date) : '-'})</SelectItem>
@@ -1035,7 +1035,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
                 </SelectContent>
               </Select>
               <Label>Akun Induk (Bisa dipindah)</Label>
-              <Select value={hostAccountId} onValueChange={setHostAccountId}>
+              <Select value={hostAccountId} onValueChange={v => setHostAccountId(v || '')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {hostAccounts.filter(h => h.status === 'aktif' && (h.id === psTarget?.host_account_id || getHostSisaSlot(h) > 0)).map(h => (
@@ -1044,7 +1044,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
                 </SelectContent>
               </Select>
               <Label>Durasi Perpanjangan</Label>
-              <Select value={durationPreset} onValueChange={setDurationPreset}>
+              <Select value={durationPreset} onValueChange={v => setDurationPreset(v || '')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1_bulan">1 Bulan</SelectItem>
@@ -1055,7 +1055,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>Pembayaran</Label>
-                  <Select value={paymentChannel} onValueChange={setPaymentChannel}>
+                  <Select value={paymentChannel} onValueChange={v => setPaymentChannel(v || '')}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>{paymentChannels.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                   </Select>
@@ -1081,7 +1081,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
               <Label>Tgl Mulai</Label><Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
               <Label>Tgl Habis</Label><Input type="date" value={editExpiryDate} onChange={e => setEditExpiryDate(e.target.value)} />
               <Label>Akun Induk</Label>
-              <Select value={hostAccountId} onValueChange={setHostAccountId}>
+              <Select value={hostAccountId} onValueChange={v => setHostAccountId(v || '')}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {hostAccounts.filter(h => h.id === psTarget?.host_account_id || getHostSisaSlot(h) > 0).map(h => (
@@ -1090,7 +1090,7 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
                 </SelectContent>
               </Select>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Pembayaran</Label><Select value={paymentChannel} onValueChange={setPaymentChannel}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{paymentChannels.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+                <div><Label>Pembayaran</Label><Select value={paymentChannel} onValueChange={v => setPaymentChannel(v || '')}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{paymentChannels.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
                 <div><Label>Harga (Rp)</Label><Input type="number" value={price} onChange={e => setPrice(Number(e.target.value))} /></div>
               </div>
             </div>
