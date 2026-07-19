@@ -80,6 +80,7 @@ export interface ResellerOrder {
   app_name: string;       // Produk / layanan yang dijual
   account: string;
   password?: string;
+  variation?: string;     // Variasi produk / durasi
   order_date: string;     // YYYY-MM-DD
   expiry_date: string;    // YYYY-MM-DD
   selling_price: number;
