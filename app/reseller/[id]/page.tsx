@@ -51,6 +51,7 @@ import {
   XCircle,
   Users,
   RefreshCw,
+  Activity,
 } from 'lucide-react';
 
 // ─── Helpers Umum ────────────────────────────────────────────────────────────
@@ -152,7 +153,7 @@ const getDurationLabelPS = (preset: string, customVal: number, customUnit: strin
 export default function ResellerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: resellerId } = use(params);
 
-  const [activeTab, setActiveTab] = useState<'pesanan' | 'premiumshare'>('pesanan');
+  const [activeTab, setActiveTab] = useState<'pesanan' | 'premiumshare' | 'aktivitas'>('pesanan');
 
   const [reseller, setReseller] = useState<Reseller | null>(null);
   const [orders, setOrders] = useState<ResellerOrder[]>([]);
@@ -559,11 +560,12 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
             </div>
           </div>
           <div className="flex gap-2">
-            {activeTab === 'pesanan' ? (
+            {activeTab === 'pesanan' && (
               <Button onClick={() => { setOrderForm({ ...emptyOrderForm }); setFormError(null); setIsAddOrderOpen(true); }} className="bg-rose-600 hover:bg-rose-500 text-white gap-2 shadow-md">
                 <Plus className="h-4 w-4" /><span>Tambah Pesanan</span>
               </Button>
-            ) : (
+            )}
+            {activeTab === 'premiumshare' && (
               <Button onClick={handleAddPSOpen} disabled={availableHosts.length === 0} className="bg-purple-600 hover:bg-purple-500 text-white gap-2 shadow-md">
                 <Plus className="h-4 w-4" /><span>Tambah PremiumShare</span>
               </Button>
@@ -584,6 +586,12 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'premiumshare' ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'}`}
           >
             PremiumShare
+          </button>
+          <button
+            onClick={() => { setActiveTab('aktivitas'); setSearchQuery(''); setStatusFilter('semua'); }}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'aktivitas' ? 'border-teal-500 text-teal-600 dark:text-teal-400' : 'border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200'}`}
+          >
+            Aktivitas
           </button>
         </div>
 
@@ -821,6 +829,74 @@ export default function ResellerDetailPage({ params }: { params: Promise<{ id: s
             </div>
           )
         )}
+
+        {/* ── Tab Aktivitas ── */}
+        {activeTab === 'aktivitas' && (() => {
+          // Kelompokkan subscriptions berdasarkan tanggal ditambahkan (created_at)
+          const grouped: Record<string, Subscription[]> = {};
+          const sorted = [...subscriptions].sort((a, b) => b.created_at - a.created_at);
+          sorted.forEach(sub => {
+            const dateKey = new Date(sub.created_at).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            if (!grouped[dateKey]) grouped[dateKey] = [];
+            grouped[dateKey].push(sub);
+          });
+          const groupEntries = Object.entries(grouped);
+
+          return subscriptions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl p-16 text-center bg-neutral-50/20 dark:bg-neutral-955/10">
+              <div className="h-12 w-12 rounded-2xl bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center mb-4">
+                <Activity className="h-6 w-6 text-teal-500" />
+              </div>
+              <h3 className="font-semibold text-neutral-800 dark:text-neutral-300 text-lg">Belum Ada Aktivitas</h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1.5">Customer PremiumShare yang ditambahkan akan muncul di sini.</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {groupEntries.map(([dateLabel, subs]) => (
+                <div key={dateLabel}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-6 w-6 rounded-lg bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center shrink-0">
+                      <Calendar className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
+                    </div>
+                    <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">{dateLabel}</p>
+                    <span className="ml-1 text-[10px] bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded-full font-medium">{subs.length} customer</span>
+                  </div>
+                  <div className="space-y-2 pl-2 border-l-2 border-teal-100 dark:border-teal-900/40 ml-3">
+                    {subs.map(sub => {
+                      const status = getSubscriptionStatus(sub.expiry_date);
+                      const timeAdded = new Date(sub.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                      return (
+                        <div key={sub.id} className="flex items-center justify-between bg-white dark:bg-neutral-950/40 border border-neutral-100 dark:border-neutral-800/60 rounded-xl px-4 py-3 ml-2">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center shrink-0">
+                              <Users className="h-4 w-4 text-teal-500" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200">{sub.customer_email}</p>
+                              <p className="text-[11px] text-neutral-400">{getHostEmail(sub.host_account_id)} &middot; {sub.duration_label} &middot; {timeAdded}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">{formatRupiah(sub.price)}</span>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
+                              status === 'aktif' ? 'bg-emerald-500/5 text-emerald-500 border-emerald-500/20' :
+                              status === 'akan_habis' ? 'bg-amber-500/5 text-amber-500 border-amber-500/20' :
+                              'bg-red-500/5 text-red-500 border-red-500/20'
+                            }`}>
+                              {status === 'aktif' && <><CheckCircle2 className="h-2.5 w-2.5" /> Aktif</>}
+                              {status === 'akan_habis' && <><Clock className="h-2.5 w-2.5" /> Akan Habis</>}
+                              {status === 'habis' && <>Habis</>}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
       </div>
 
       {/* ── DIALOGS: Pesanan Umum ── */}
